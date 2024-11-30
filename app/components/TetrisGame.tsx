@@ -31,7 +31,11 @@ const initialState: GameState = {
   isGameOver: false,
 };
 
-function gameReducer(state: GameState, action: GameAction): GameState {
+function gameReducer(
+  state: GameState,
+  action: GameAction,
+  dispatch: React.Dispatch<GameAction>
+): GameState {
   switch (action.type) {
     case "MOVE_LEFT":
       if (
@@ -112,19 +116,26 @@ function gameReducer(state: GameState, action: GameAction): GameState {
 
           // Set the animating state
           setTimeout(() => {
-            // After animation, clear the rows
-            const clearedBoard = newBoard
+            // Remove completed rows and update remaining blocks' positions
+            let clearedBoard = newBoard
               .filter((_, index) => !completedRows.includes(index))
-              .map((row) =>
+              .map((row, newY) =>
                 row.map((block) =>
-                  block ? { ...block, isClearing: false } : null
+                  block
+                    ? {
+                        ...block,
+                        y: newY, // Update Y position for each block
+                        isClearing: false,
+                      }
+                    : null
                 )
               );
 
             // Add new empty rows at the top
-            while (clearedBoard.length < BOARD_HEIGHT) {
-              clearedBoard.unshift(Array(BOARD_WIDTH).fill(null));
-            }
+            const emptyRows = Array(completedRows.length)
+              .fill(null)
+              .map(() => Array(BOARD_WIDTH).fill(null));
+            clearedBoard = [...emptyRows, ...clearedBoard];
 
             // Update the state with cleared board
             dispatch({
@@ -132,7 +143,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
               board: clearedBoard,
               scoreIncrease: completedRows.length * 100,
             });
-          }, 200); // Match this with the animation duration
+          }, 200);
 
           return {
             ...state,
@@ -218,7 +229,13 @@ function gameReducer(state: GameState, action: GameAction): GameState {
 }
 
 export default function TetrisGame() {
-  const [gameState, dispatch] = useReducer(gameReducer, initialState);
+  const [gameState, setGameState] = useReducer(
+    (state: GameState, action: GameAction) => {
+      const dispatch = setGameState; // Make dispatch available in reducer
+      return gameReducer(state, action, dispatch);
+    },
+    initialState
+  );
   const gameOver$ = new Subject<void>();
 
   // Calculate current game speed based on score
@@ -244,7 +261,7 @@ export default function TetrisGame() {
     );
 
     const subscription = gameLoop$.subscribe(() => {
-      dispatch({ type: "MOVE_DOWN" });
+      setGameState({ type: "MOVE_DOWN" });
     });
 
     return () => {
@@ -258,17 +275,17 @@ export default function TetrisGame() {
     if (!gameState.currentPiece && !gameState.isGameOver) {
       const newPiece = createRandomPiece();
       if (isValidMove(newPiece, gameState.board)) {
-        dispatch({ type: "NEW_PIECE", piece: newPiece });
+        setGameState({ type: "NEW_PIECE", piece: newPiece });
       } else {
-        dispatch({ type: "GAME_OVER" });
+        setGameState({ type: "GAME_OVER" });
       }
     }
   }, [gameState.currentPiece, gameState.isGameOver]);
 
-  const moveLeft = useCallback(() => dispatch({ type: "MOVE_LEFT" }), []);
-  const moveRight = useCallback(() => dispatch({ type: "MOVE_RIGHT" }), []);
-  const rotate = useCallback(() => dispatch({ type: "ROTATE" }), []);
-  const hardDrop = useCallback(() => dispatch({ type: "HARD_DROP" }), []);
+  const moveLeft = useCallback(() => setGameState({ type: "MOVE_LEFT" }), []);
+  const moveRight = useCallback(() => setGameState({ type: "MOVE_RIGHT" }), []);
+  const rotate = useCallback(() => setGameState({ type: "ROTATE" }), []);
+  const hardDrop = useCallback(() => setGameState({ type: "HARD_DROP" }), []);
 
   return (
     <View style={styles.container}>
