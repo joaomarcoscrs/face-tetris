@@ -194,7 +194,7 @@ export default function TetrisGame() {
           <Ionicons
             name="arrow-back"
             size={30}
-            color={CustomDarkTheme.colors.primary}
+            color={CustomDarkTheme.colors.secondary}
           />
         </TouchableOpacity>
 
@@ -202,7 +202,7 @@ export default function TetrisGame() {
           <Ionicons
             name="refresh"
             size={30}
-            color={CustomDarkTheme.colors.primary}
+            color={CustomDarkTheme.colors.secondary}
           />
         </TouchableOpacity>
 
@@ -210,7 +210,7 @@ export default function TetrisGame() {
           <Ionicons
             name="arrow-forward"
             size={30}
-            color={CustomDarkTheme.colors.primary}
+            color={CustomDarkTheme.colors.secondary}
           />
         </TouchableOpacity>
 
@@ -218,7 +218,7 @@ export default function TetrisGame() {
           <Ionicons
             name="arrow-down"
             size={30}
-            color={CustomDarkTheme.colors.primary}
+            color={CustomDarkTheme.colors.secondary}
           />
         </TouchableOpacity>
       </View>
@@ -244,8 +244,6 @@ const styles = StyleSheet.create({
   controlButton: {
     width: 60,
     height: 60,
-    borderRadius: 30,
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
     justifyContent: "center",
     alignItems: "center",
   },
