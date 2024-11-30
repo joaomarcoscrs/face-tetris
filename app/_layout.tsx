@@ -1,5 +1,9 @@
 import { ThemeProvider } from "@react-navigation/native";
-import { useFonts } from "expo-font";
+import {
+  useFonts,
+  JetBrainsMono_400Regular,
+  JetBrainsMono_700Bold,
+} from "@expo-google-fonts/jetbrains-mono";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
@@ -13,7 +17,8 @@ SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const [loaded] = useFonts({
-    SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
+    JetBrainsMono_400Regular,
+    JetBrainsMono_700Bold,
   });
 
   useEffect(() => {
