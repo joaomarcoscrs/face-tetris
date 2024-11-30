@@ -15,6 +15,7 @@ import { CustomDarkTheme } from "../../constants/theme";
 import { interval, Subject, fromEvent } from "rxjs";
 import { filter, takeUntil } from "rxjs/operators";
 import { GAME_OVER_LINE } from "./TetrisBoard";
+import GameOverOverlay from "./GameOverOverlay";
 
 const initialState: GameState = {
   currentPiece: null,
@@ -221,6 +222,8 @@ export default function TetrisGame() {
           />
         </TouchableOpacity>
       </View>
+
+      {gameState.isGameOver && <GameOverOverlay />}
     </View>
   );
 }
