@@ -16,6 +16,7 @@ export default function HomeScreen() {
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const pressAnim = useRef(new Animated.Value(1)).current;
   const bgAnim = useRef(new Animated.Value(0)).current;
+  const playRotateAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     // Floating animations for both words
@@ -52,17 +53,33 @@ export default function HomeScreen() {
 
     // Pulsing play button animation
     Animated.loop(
-      Animated.sequence([
-        Animated.timing(pulseAnim, {
-          toValue: 1.1,
-          duration: 1000,
-          useNativeDriver: true,
-        }),
-        Animated.timing(pulseAnim, {
-          toValue: 1,
-          duration: 1000,
-          useNativeDriver: true,
-        }),
+      Animated.parallel([
+        // Scale animation
+        Animated.sequence([
+          Animated.timing(pulseAnim, {
+            toValue: 1.15,
+            duration: 1500,
+            useNativeDriver: true,
+          }),
+          Animated.timing(pulseAnim, {
+            toValue: 1,
+            duration: 1500,
+            useNativeDriver: true,
+          }),
+        ]),
+        // Rotation animation
+        Animated.sequence([
+          Animated.timing(playRotateAnim, {
+            toValue: 1,
+            duration: 3000,
+            useNativeDriver: true,
+          }),
+          Animated.timing(playRotateAnim, {
+            toValue: 0,
+            duration: 3000,
+            useNativeDriver: true,
+          }),
+        ]),
       ])
     ).start();
 
@@ -142,6 +159,18 @@ export default function HomeScreen() {
     ],
   };
 
+  const playButtonTransform = {
+    transform: [
+      { scale: Animated.multiply(pulseAnim, pressAnim) },
+      {
+        rotate: playRotateAnim.interpolate({
+          inputRange: [0, 1],
+          outputRange: ["-3deg", "3deg"],
+        }),
+      },
+    ],
+  };
+
   return (
     <Animated.View style={[styles.container, bgTransform]}>
       <ImageBackground
@@ -181,11 +210,7 @@ export default function HomeScreen() {
             onPressOut={handlePressOut}
           >
             <Animated.View
-              style={{
-                transform: [{ scale: Animated.multiply(pulseAnim, pressAnim) }],
-                flexDirection: "row",
-                alignItems: "center",
-              }}
+              style={[styles.playButtonContent, playButtonTransform]}
             >
               <Ionicons
                 name="play"
@@ -209,7 +234,7 @@ const styles = StyleSheet.create({
   },
   titleContainer: {
     position: "absolute",
-    top: 60,
+    top: 120,
     left: 0,
     right: 0,
     alignItems: "center",
@@ -255,5 +280,9 @@ const styles = StyleSheet.create({
     color: CustomDarkTheme.colors.primary,
     letterSpacing: 1,
     textTransform: "lowercase",
+  },
+  playButtonContent: {
+    flexDirection: "row",
+    alignItems: "center",
   },
 });
