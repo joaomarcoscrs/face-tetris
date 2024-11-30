@@ -100,27 +100,19 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         }, [] as number[]);
 
         if (completedRows.length > 0) {
-          // Mark blocks in completed rows as clearing
-          const animatingBoard = newBoard.map((row, y) =>
-            row.map((block) =>
-              block && completedRows.includes(y)
-                ? { ...block, isClearing: true }
-                : block
-            )
+          // Clear rows immediately but mark them for animation
+          const clearedBoard = newBoard.filter(
+            (_, index) => !completedRows.includes(index)
           );
-
-          // After animation, clear the rows and update score
-          setTimeout(() => {
-            dispatch({
-              type: "CLEAR_ROWS",
-              rows: completedRows,
-            });
-          }, 300);
+          while (clearedBoard.length < BOARD_HEIGHT) {
+            clearedBoard.unshift(Array(BOARD_WIDTH).fill(null));
+          }
 
           return {
             ...state,
             currentPiece: null,
-            board: animatingBoard,
+            board: clearedBoard,
+            score: state.score + completedRows.length * 100,
           };
         }
 
