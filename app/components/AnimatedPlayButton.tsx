@@ -8,8 +8,10 @@ import {
 import { useEffect, useRef } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { CustomDarkTheme } from "../../constants/theme";
+import { useRouter } from "expo-router";
 
 export default function AnimatedPlayButton() {
+  const router = useRouter();
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const pressAnim = useRef(new Animated.Value(1)).current;
   const playRotateAnim = useRef(new Animated.Value(0)).current;
@@ -62,6 +64,11 @@ export default function AnimatedPlayButton() {
     }).start();
   };
 
+  const handlePress = () => {
+    // Navigate to the game screen
+    router.push("/(tabs)/game");
+  };
+
   const playButtonTransform = {
     transform: [
       { scale: Animated.multiply(pulseAnim, pressAnim) },
@@ -78,9 +85,7 @@ export default function AnimatedPlayButton() {
     <View style={styles.buttonContainer}>
       <TouchableOpacity
         style={styles.playButton}
-        onPress={() => {
-          // Will add functionality later
-        }}
+        onPress={handlePress}
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
       >
