@@ -115,17 +115,17 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       return state;
 
     case "NEW_PIECE":
-      if (
-        action.piece.blocks.some((block) => {
-          const absoluteY = action.piece.y + block.y;
-          return absoluteY <= GAME_OVER_LINE;
-        })
-      ) {
+      const blocksAboveLine = state.board
+        .slice(0, GAME_OVER_LINE)
+        .some((row) => row.some((cell) => cell !== null));
+
+      if (blocksAboveLine) {
         return {
           ...state,
           isGameOver: true,
         };
       }
+
       return {
         ...state,
         currentPiece: action.piece,
