@@ -4,11 +4,116 @@ import {
   StyleSheet,
   ImageBackground,
   Text,
+  Animated,
 } from "react-native";
+import { useEffect, useRef } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { CustomDarkTheme } from "../constants/theme";
 
 export default function HomeScreen() {
+  const faceAnim = useRef(new Animated.Value(0)).current;
+  const tetrisAnim = useRef(new Animated.Value(0)).current;
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+  const pressAnim = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    // Floating animations for both words
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(faceAnim, {
+          toValue: 1,
+          duration: 1500,
+          useNativeDriver: true,
+        }),
+        Animated.timing(faceAnim, {
+          toValue: 0,
+          duration: 1500,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+
+    // Start tetris animation with a delay and different duration
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(tetrisAnim, {
+          toValue: 1,
+          duration: 2000,
+          useNativeDriver: true,
+        }),
+        Animated.timing(tetrisAnim, {
+          toValue: 0,
+          duration: 2000,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+
+    // Pulsing play button animation
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 1.1,
+          duration: 1000,
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 1,
+          duration: 1000,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+  }, []);
+
+  const handlePressIn = () => {
+    Animated.spring(pressAnim, {
+      toValue: 0.95,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const handlePressOut = () => {
+    Animated.spring(pressAnim, {
+      toValue: 1,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const faceTransform = {
+    transform: [
+      {
+        translateY: faceAnim.interpolate({
+          inputRange: [0, 1],
+          outputRange: [0, -8],
+        }),
+      },
+      {
+        rotate: faceAnim.interpolate({
+          inputRange: [0, 1],
+          outputRange: ["0deg", "2deg"],
+        }),
+      },
+    ],
+  };
+
+  const tetrisTransform = {
+    transform: [
+      {
+        translateY: tetrisAnim.interpolate({
+          inputRange: [0, 1],
+          outputRange: [0, -12],
+        }),
+      },
+      {
+        rotate: tetrisAnim.interpolate({
+          inputRange: [0, 1],
+          outputRange: ["0deg", "-2deg"],
+        }),
+      },
+    ],
+  };
+
   return (
     <ImageBackground
       source={require("../assets/images/visual-2048.png")}
@@ -17,16 +122,24 @@ export default function HomeScreen() {
     >
       <View style={styles.titleContainer}>
         <View style={styles.titleWrapper}>
-          <Text
-            style={[styles.titleText, { color: CustomDarkTheme.colors.accent }]}
+          <Animated.Text
+            style={[
+              styles.titleText,
+              { color: CustomDarkTheme.colors.accent },
+              faceTransform,
+            ]}
           >
             face
-          </Text>
-          <Text
-            style={[styles.titleText, { color: CustomDarkTheme.colors.error }]}
+          </Animated.Text>
+          <Animated.Text
+            style={[
+              styles.titleText,
+              { color: CustomDarkTheme.colors.error },
+              tetrisTransform,
+            ]}
           >
             tetris
-          </Text>
+          </Animated.Text>
         </View>
       </View>
       <View style={styles.buttonContainer}>
@@ -35,14 +148,24 @@ export default function HomeScreen() {
           onPress={() => {
             // Will add functionality later
           }}
+          onPressIn={handlePressIn}
+          onPressOut={handlePressOut}
         >
-          <Ionicons
-            name="play"
-            size={40}
-            color={CustomDarkTheme.colors.background}
-            style={styles.playIcon}
-          />
-          <Text style={styles.buttonText}>play</Text>
+          <Animated.View
+            style={{
+              transform: [{ scale: Animated.multiply(pulseAnim, pressAnim) }],
+              flexDirection: "row",
+              alignItems: "center",
+            }}
+          >
+            <Ionicons
+              name="play"
+              size={40}
+              color={CustomDarkTheme.colors.background}
+              style={styles.playIcon}
+            />
+            <Text style={styles.buttonText}>play</Text>
+          </Animated.View>
         </TouchableOpacity>
       </View>
     </ImageBackground>
