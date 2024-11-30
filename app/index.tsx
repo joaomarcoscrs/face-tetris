@@ -15,6 +15,7 @@ export default function HomeScreen() {
   const tetrisAnim = useRef(new Animated.Value(0)).current;
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const pressAnim = useRef(new Animated.Value(1)).current;
+  const bgAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     // Floating animations for both words
@@ -60,6 +61,22 @@ export default function HomeScreen() {
         Animated.timing(pulseAnim, {
           toValue: 1,
           duration: 1000,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+
+    // Add this new background animation
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(bgAnim, {
+          toValue: 1,
+          duration: 8000,
+          useNativeDriver: true,
+        }),
+        Animated.timing(bgAnim, {
+          toValue: 0,
+          duration: 8000,
           useNativeDriver: true,
         }),
       ])
@@ -114,67 +131,81 @@ export default function HomeScreen() {
     ],
   };
 
+  const bgTransform = {
+    transform: [
+      {
+        scale: bgAnim.interpolate({
+          inputRange: [0, 1],
+          outputRange: [1, 1.1],
+        }),
+      },
+    ],
+  };
+
   return (
-    <ImageBackground
-      source={require("../assets/images/visual-2048.png")}
-      style={styles.container}
-      resizeMode="contain"
-    >
-      <View style={styles.titleContainer}>
-        <View style={styles.titleWrapper}>
-          <Animated.Text
-            style={[
-              styles.titleText,
-              { color: CustomDarkTheme.colors.accent },
-              faceTransform,
-            ]}
-          >
-            face
-          </Animated.Text>
-          <Animated.Text
-            style={[
-              styles.titleText,
-              { color: CustomDarkTheme.colors.error },
-              tetrisTransform,
-            ]}
-          >
-            tetris
-          </Animated.Text>
+    <Animated.View style={[styles.container, bgTransform]}>
+      <ImageBackground
+        source={require("../assets/images/visual-2048.png")}
+        style={styles.container}
+        resizeMode="contain"
+      >
+        <View style={styles.titleContainer}>
+          <View style={styles.titleWrapper}>
+            <Animated.Text
+              style={[
+                styles.titleText,
+                { color: CustomDarkTheme.colors.accent },
+                faceTransform,
+              ]}
+            >
+              face
+            </Animated.Text>
+            <Animated.Text
+              style={[
+                styles.titleText,
+                { color: CustomDarkTheme.colors.error },
+                tetrisTransform,
+              ]}
+            >
+              tetris
+            </Animated.Text>
+          </View>
         </View>
-      </View>
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity
-          style={styles.playButton}
-          onPress={() => {
-            // Will add functionality later
-          }}
-          onPressIn={handlePressIn}
-          onPressOut={handlePressOut}
-        >
-          <Animated.View
-            style={{
-              transform: [{ scale: Animated.multiply(pulseAnim, pressAnim) }],
-              flexDirection: "row",
-              alignItems: "center",
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            style={styles.playButton}
+            onPress={() => {
+              // Will add functionality later
             }}
+            onPressIn={handlePressIn}
+            onPressOut={handlePressOut}
           >
-            <Ionicons
-              name="play"
-              size={40}
-              color={CustomDarkTheme.colors.background}
-              style={styles.playIcon}
-            />
-            <Text style={styles.buttonText}>play</Text>
-          </Animated.View>
-        </TouchableOpacity>
-      </View>
-    </ImageBackground>
+            <Animated.View
+              style={{
+                transform: [{ scale: Animated.multiply(pulseAnim, pressAnim) }],
+                flexDirection: "row",
+                alignItems: "center",
+              }}
+            >
+              <Ionicons
+                name="play"
+                size={40}
+                color={CustomDarkTheme.colors.background}
+                style={styles.playIcon}
+              />
+              <Text style={styles.buttonText}>play</Text>
+            </Animated.View>
+          </TouchableOpacity>
+        </View>
+      </ImageBackground>
+    </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: CustomDarkTheme.colors.background,
   },
   titleContainer: {
     position: "absolute",
