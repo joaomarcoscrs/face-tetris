@@ -23,10 +23,7 @@ export default function HomeScreen() {
             face
           </Text>
           <Text
-            style={[
-              styles.titleText,
-              { color: CustomDarkTheme.colors.primary },
-            ]}
+            style={[styles.titleText, { color: CustomDarkTheme.colors.error }]}
           >
             tetris
           </Text>
