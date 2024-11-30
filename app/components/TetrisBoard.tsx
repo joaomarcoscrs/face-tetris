@@ -4,6 +4,7 @@ import { BOARD_WIDTH, BOARD_HEIGHT, BLOCK_SIZE } from "../constants/tetris";
 import { GameState } from "../types/tetris";
 import TetrisBlock from "./TetrisBlock";
 import DashLine from "./DashLine";
+import GhostPiece from "./GhostPiece";
 
 export const GAME_OVER_LINE = 3;
 
@@ -21,6 +22,7 @@ export default function TetrisBoard({ gameState }: Props) {
           (block, x) => block && <TetrisBlock key={`${x}-${y}`} block={block} />
         )
       )}
+      {currentPiece && <GhostPiece currentPiece={currentPiece} board={board} />}
       {currentPiece?.blocks.map((block, index) => (
         <TetrisBlock
           key={`current-${index}`}

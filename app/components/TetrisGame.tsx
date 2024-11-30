@@ -21,6 +21,7 @@ import {
   SPEED_INCREASE_FACTOR,
   LEVEL_THRESHOLD,
 } from "../constants/tetris";
+import ScoreDisplay from "./ScoreDisplay";
 
 const initialState: GameState = {
   currentPiece: null,
@@ -89,12 +90,44 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       // If can't move down, merge piece to board
       if (state.currentPiece) {
         const newBoard = mergePieceToBoard(state.currentPiece, state.board);
-        const clearedBoard = clearLines(newBoard);
+
+        // Find completed rows
+        const completedRows = newBoard.reduce((acc, row, index) => {
+          if (row.every((cell) => cell !== null)) {
+            acc.push(index);
+          }
+          return acc;
+        }, [] as number[]);
+
+        if (completedRows.length > 0) {
+          // Mark blocks in completed rows as clearing
+          const animatingBoard = newBoard.map((row, y) =>
+            row.map((block) =>
+              block && completedRows.includes(y)
+                ? { ...block, isClearing: true }
+                : block
+            )
+          );
+
+          // After animation, clear the rows and update score
+          setTimeout(() => {
+            dispatch({
+              type: "CLEAR_ROWS",
+              rows: completedRows,
+            });
+          }, 300);
+
+          return {
+            ...state,
+            currentPiece: null,
+            board: animatingBoard,
+          };
+        }
+
         return {
           ...state,
           currentPiece: null,
-          board: clearedBoard,
-          score: state.score + (clearedBoard !== newBoard ? 100 : 0),
+          board: newBoard,
         };
       }
       return state;
@@ -140,6 +173,19 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       return {
         ...state,
         isGameOver: true,
+      };
+
+    case "CLEAR_ROWS":
+      const newBoard = state.board.filter(
+        (_, index) => !action.rows.includes(index)
+      );
+      while (newBoard.length < BOARD_HEIGHT) {
+        newBoard.unshift(Array(BOARD_WIDTH).fill(null));
+      }
+      return {
+        ...state,
+        board: newBoard,
+        score: state.score + action.rows.length * 100,
       };
 
     default:
@@ -202,6 +248,7 @@ export default function TetrisGame() {
 
   return (
     <View style={styles.container}>
+      <ScoreDisplay score={gameState.score} />
       <TetrisBoard gameState={gameState} />
 
       <View style={styles.controls}>

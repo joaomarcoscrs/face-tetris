@@ -27,4 +27,5 @@ export type GameAction =
   | { type: "MOVE_DOWN" }
   | { type: "HARD_DROP" }
   | { type: "NEW_PIECE"; piece: TetrisPiece }
-  | { type: "GAME_OVER" };
+  | { type: "GAME_OVER" }
+  | { type: "CLEAR_ROWS"; rows: number[] };
