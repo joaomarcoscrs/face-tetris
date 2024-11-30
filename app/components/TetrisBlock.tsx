@@ -5,43 +5,32 @@ import { BLOCK_SIZE, COLORS } from "../constants/tetris";
 
 interface Props {
   block: TetrisBlockType;
-  isClearing?: boolean;
 }
 
-export default function TetrisBlock({ block, isClearing }: Props) {
+export default function TetrisBlock({ block }: Props) {
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const opacityAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
-    if (isClearing) {
-      Animated.sequence([
-        Animated.parallel([
-          Animated.timing(scaleAnim, {
-            toValue: 1.2,
-            duration: 100,
-            useNativeDriver: true,
-          }),
-          Animated.timing(opacityAnim, {
-            toValue: 0.7,
-            duration: 100,
-            useNativeDriver: true,
-          }),
-        ]),
-        Animated.parallel([
-          Animated.timing(scaleAnim, {
-            toValue: 0,
-            duration: 200,
-            useNativeDriver: true,
-          }),
-          Animated.timing(opacityAnim, {
-            toValue: 0,
-            duration: 200,
-            useNativeDriver: true,
-          }),
-        ]),
+    if (block.isClearing) {
+      Animated.parallel([
+        Animated.timing(scaleAnim, {
+          toValue: 1.2,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+        Animated.timing(opacityAnim, {
+          toValue: 0,
+          duration: 200,
+          useNativeDriver: true,
+        }),
       ]).start();
+    } else {
+      // Reset animations when not clearing
+      scaleAnim.setValue(1);
+      opacityAnim.setValue(1);
     }
-  }, [isClearing]);
+  }, [block.isClearing]);
 
   return (
     <Animated.View

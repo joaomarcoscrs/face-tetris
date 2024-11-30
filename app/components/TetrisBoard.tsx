@@ -18,34 +18,36 @@ export default function TetrisBoard({ gameState }: Props) {
 
   return (
     <View style={styles.boardContainer}>
-      <View style={styles.board}>
-        {board.map((row, y) =>
-          row.map(
-            (block, x) =>
-              block && <TetrisBlock key={`${x}-${y}`} block={block} />
-          )
-        )}
-        {currentPiece && (
-          <GhostPiece currentPiece={currentPiece} board={board} />
-        )}
-        {currentPiece?.blocks.map((block, index) => (
-          <TetrisBlock
-            key={`current-${index}`}
-            block={{
-              ...block,
-              x: currentPiece.x + block.x,
-              y: currentPiece.y + block.y,
-              color: block.color,
-            }}
-          />
-        ))}
-        <View
-          style={[
-            styles.dashLineContainer,
-            { top: GAME_OVER_LINE * BLOCK_SIZE },
-          ]}
-        >
-          <DashLine />
+      <View style={styles.boardBorder}>
+        <View style={styles.board}>
+          {board.map((row, y) =>
+            row.map(
+              (block, x) =>
+                block && <TetrisBlock key={`${x}-${y}`} block={block} />
+            )
+          )}
+          {currentPiece && (
+            <GhostPiece currentPiece={currentPiece} board={board} />
+          )}
+          {currentPiece?.blocks.map((block, index) => (
+            <TetrisBlock
+              key={`current-${index}`}
+              block={{
+                ...block,
+                x: currentPiece.x + block.x,
+                y: currentPiece.y + block.y,
+                color: block.color,
+              }}
+            />
+          ))}
+          <View
+            style={[
+              styles.dashLineContainer,
+              { top: GAME_OVER_LINE * BLOCK_SIZE },
+            ]}
+          >
+            <DashLine />
+          </View>
         </View>
       </View>
     </View>
@@ -54,15 +56,19 @@ export default function TetrisBoard({ gameState }: Props) {
 
 const styles = StyleSheet.create({
   boardContainer: {
-    padding: 2,
+    padding: 3,
+    backgroundColor: CustomDarkTheme.colors.background,
+    borderRadius: 16,
+  },
+  boardBorder: {
+    padding: 3,
     borderRadius: 12,
-    backgroundColor: CustomDarkTheme.colors.secondary,
-    opacity: 0.3,
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
   },
   board: {
     width: BOARD_WIDTH * BLOCK_SIZE,
     height: BOARD_HEIGHT * BLOCK_SIZE,
-    backgroundColor: "rgba(0, 0, 0, 0.2)",
+    backgroundColor: CustomDarkTheme.colors.background,
     borderRadius: 8,
     overflow: "hidden",
   },

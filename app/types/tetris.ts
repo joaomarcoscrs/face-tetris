@@ -4,6 +4,7 @@ export interface TetrisBlock {
   x: number;
   y: number;
   color: TetrisPieceColor;
+  isClearing?: boolean;
 }
 
 export interface TetrisPiece {
@@ -28,4 +29,9 @@ export type GameAction =
   | { type: "HARD_DROP" }
   | { type: "NEW_PIECE"; piece: TetrisPiece }
   | { type: "GAME_OVER" }
-  | { type: "CLEAR_ROWS"; rows: number[] };
+  | { type: "CLEAR_ROWS"; rows: number[] }
+  | {
+      type: "UPDATE_BOARD";
+      board: (TetrisBlock | null)[][];
+      scoreIncrease: number;
+    };

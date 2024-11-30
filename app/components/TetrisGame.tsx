@@ -22,6 +22,7 @@ import {
   LEVEL_THRESHOLD,
 } from "../constants/tetris";
 import ScoreDisplay from "./ScoreDisplay";
+import { BOARD_WIDTH, BOARD_HEIGHT } from "../constants/tetris";
 
 const initialState: GameState = {
   currentPiece: null,
@@ -100,19 +101,43 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         }, [] as number[]);
 
         if (completedRows.length > 0) {
-          // Clear rows immediately but mark them for animation
-          const clearedBoard = newBoard.filter(
-            (_, index) => !completedRows.includes(index)
+          // First, mark the rows for animation
+          const animatingBoard = newBoard.map((row, y) =>
+            row.map((block) =>
+              block && completedRows.includes(y)
+                ? { ...block, isClearing: true }
+                : block
+            )
           );
-          while (clearedBoard.length < BOARD_HEIGHT) {
-            clearedBoard.unshift(Array(BOARD_WIDTH).fill(null));
-          }
+
+          // Set the animating state
+          setTimeout(() => {
+            // After animation, clear the rows
+            const clearedBoard = newBoard
+              .filter((_, index) => !completedRows.includes(index))
+              .map((row) =>
+                row.map((block) =>
+                  block ? { ...block, isClearing: false } : null
+                )
+              );
+
+            // Add new empty rows at the top
+            while (clearedBoard.length < BOARD_HEIGHT) {
+              clearedBoard.unshift(Array(BOARD_WIDTH).fill(null));
+            }
+
+            // Update the state with cleared board
+            dispatch({
+              type: "UPDATE_BOARD",
+              board: clearedBoard,
+              scoreIncrease: completedRows.length * 100,
+            });
+          }, 200); // Match this with the animation duration
 
           return {
             ...state,
             currentPiece: null,
-            board: clearedBoard,
-            score: state.score + completedRows.length * 100,
+            board: animatingBoard,
           };
         }
 
@@ -123,6 +148,13 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         };
       }
       return state;
+
+    case "UPDATE_BOARD":
+      return {
+        ...state,
+        board: action.board,
+        score: state.score + action.scoreIncrease,
+      };
 
     case "HARD_DROP":
       if (state.currentPiece) {
