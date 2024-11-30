@@ -41,11 +41,11 @@ const styles = StyleSheet.create({
   overlay: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: CustomDarkTheme.colors.background,
-    opacity: 0.5,
+    opacity: 0.8,
   },
   text: {
     fontFamily: "JetBrainsMono_700Bold",
-    fontSize: 32,
+    fontSize: 48,
     color: CustomDarkTheme.colors.error,
     textTransform: "lowercase",
   },
