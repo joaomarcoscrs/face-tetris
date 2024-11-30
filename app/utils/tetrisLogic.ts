@@ -70,12 +70,37 @@ export const mergePieceToBoard = (
   return newBoard;
 };
 
-export const clearLines = (
+export const clearCompletedRows = (
   board: (TetrisBlock | null)[][]
 ): (TetrisBlock | null)[][] => {
-  const newBoard = board.filter((row) => row.some((cell) => cell === null));
-  while (newBoard.length < BOARD_HEIGHT) {
-    newBoard.unshift(Array(BOARD_WIDTH).fill(null));
+  // Create a new board
+  let newBoard = board.map((row) => [...row]);
+
+  // Find completed rows
+  const completedRows = board.reduce((acc, row, index) => {
+    if (row.every((cell) => cell !== null)) {
+      acc.push(index);
+    }
+    return acc;
+  }, [] as number[]);
+
+  // Remove completed rows and add new empty rows at the top
+  if (completedRows.length > 0) {
+    // Remove completed rows
+    newBoard = newBoard.filter((_, index) => !completedRows.includes(index));
+
+    // Add new empty rows at the top
+    const newRows = Array(completedRows.length)
+      .fill(null)
+      .map(() => Array(BOARD_WIDTH).fill(null));
+
+    newBoard = [...newRows, ...newBoard];
+
+    // Update y-coordinates of remaining blocks
+    newBoard = newBoard.map((row, y) =>
+      row.map((block) => (block ? { ...block, y } : null))
+    );
   }
+
   return newBoard;
 };

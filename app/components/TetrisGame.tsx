@@ -7,7 +7,7 @@ import {
   isValidMove,
   rotatePiece,
   mergePieceToBoard,
-  clearLines,
+  clearCompletedRows,
 } from "../utils/tetrisLogic";
 import TetrisBoard from "./TetrisBoard";
 import { Ionicons } from "@expo/vector-icons";
@@ -186,18 +186,40 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         isGameOver: true,
       };
 
-    case "CLEAR_ROWS":
-      const newBoard = state.board.filter(
-        (_, index) => !action.rows.includes(index)
-      );
-      //   while (newBoard.length < BOARD_HEIGHT) {
-      //     newBoard.unshift(Array(BOARD_WIDTH).fill(null));
-      //   }
+    case "CLEAR_ROWS": {
+      // Create a temporary array of all non-completed rows
+      const remainingRows = [];
+      for (let y = 0; y < BOARD_HEIGHT; y++) {
+        if (!action.rows.includes(y)) {
+          remainingRows.push(state.board[y]);
+        }
+      }
+
+      // Create the new board starting with empty rows
+      const updatedBoard = Array(BOARD_HEIGHT)
+        .fill(null)
+        .map(() => Array(BOARD_WIDTH).fill(null));
+
+      // Fill the board from bottom to top
+      let currentRow = BOARD_HEIGHT - 1;
+      for (let i = remainingRows.length - 1; i >= 0; i--) {
+        remainingRows[i].forEach((block, x) => {
+          if (block) {
+            updatedBoard[currentRow][x] = {
+              ...block,
+              y: currentRow,
+            };
+          }
+        });
+        currentRow--;
+      }
+
       return {
         ...state,
-        board: newBoard,
+        board: updatedBoard,
         score: state.score + action.rows.length * 100,
       };
+    }
 
     default:
       return state;
@@ -260,7 +282,7 @@ export default function TetrisGame() {
     if (gameState.pendingClear) {
       const { board: newBoard, rows: completedRows } = gameState.pendingClear;
 
-      // First, show animation
+      // First, show animation for the rows that will be cleared
       dispatch({
         type: "UPDATE_BOARD",
         board: newBoard.map((row, y) =>
@@ -275,33 +297,31 @@ export default function TetrisGame() {
 
       // Then update the board after animation
       const timeoutId = setTimeout(() => {
-        // First, remove completed rows
-        let clearedBoard = newBoard.filter(
-          (_, index) => !completedRows.includes(index)
-        );
+        // Create a temporary array of all rows
+        const allRows = [...newBoard];
 
-        // Then shift all remaining blocks down
-        clearedBoard = clearedBoard.map((row, newY) =>
-          row.map((block) =>
-            block
-              ? {
-                  ...block,
-                  y: BOARD_HEIGHT - clearedBoard.length + newY, // Position from bottom up
-                  isClearing: false,
-                }
-              : null
-          )
-        );
+        // Remove completed rows
+        completedRows.sort((a, b) => b - a); // Sort in descending order
+        completedRows.forEach((rowIndex) => {
+          allRows.splice(rowIndex, 1);
+        });
 
         // Add new empty rows at the top
         const emptyRows = Array(completedRows.length)
           .fill(null)
           .map(() => Array(BOARD_WIDTH).fill(null));
-        clearedBoard = [...emptyRows, ...clearedBoard];
+        allRows.unshift(...emptyRows);
+
+        // Update block positions
+        const updatedBoard = allRows.map((row, y) =>
+          row.map((block) =>
+            block ? { ...block, y, isClearing: false } : null
+          )
+        );
 
         dispatch({
           type: "UPDATE_BOARD",
-          board: clearedBoard,
+          board: updatedBoard,
           scoreIncrease: completedRows.length * 100,
         });
       }, 200);

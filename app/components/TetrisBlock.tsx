@@ -34,20 +34,30 @@ export default function TetrisBlock({ block }: Props) {
     }
   }, [block.isClearing]);
 
-  // Handle position animations
+  // Handle position changes immediately for row clearing
   useEffect(() => {
-    Animated.parallel([
-      Animated.timing(positionX, {
-        toValue: block.x * BLOCK_SIZE,
-        duration: 50,
-        useNativeDriver: true,
-      }),
-      Animated.timing(positionY, {
-        toValue: block.y * BLOCK_SIZE,
-        duration: 50,
-        useNativeDriver: true,
-      }),
-    ]).start();
+    // If the change in Y position is more than 1 unit, it's likely due to row clearing
+    // In this case, we want an immediate position update
+    const isRowClearing = Math.abs(positionY._value / BLOCK_SIZE - block.y) > 1;
+
+    if (isRowClearing) {
+      positionX.setValue(block.x * BLOCK_SIZE);
+      positionY.setValue(block.y * BLOCK_SIZE);
+    } else {
+      // For normal piece movement, use smooth animation
+      Animated.parallel([
+        Animated.timing(positionX, {
+          toValue: block.x * BLOCK_SIZE,
+          duration: 50,
+          useNativeDriver: true,
+        }),
+        Animated.timing(positionY, {
+          toValue: block.y * BLOCK_SIZE,
+          duration: 50,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }
   }, [block.x, block.y]);
 
   return (
