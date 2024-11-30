@@ -19,6 +19,10 @@ export interface GameState {
   board: (TetrisBlock | null)[][];
   score: number;
   isGameOver: boolean;
+  pendingClear: {
+    board: (TetrisBlock | null)[][];
+    rows: number[];
+  } | null;
 }
 
 export type GameAction =

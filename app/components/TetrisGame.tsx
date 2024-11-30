@@ -29,13 +29,10 @@ const initialState: GameState = {
   board: createEmptyBoard(),
   score: 0,
   isGameOver: false,
+  pendingClear: null,
 };
 
-function gameReducer(
-  state: GameState,
-  action: GameAction,
-  dispatch: React.Dispatch<GameAction>
-): GameState {
+function gameReducer(state: GameState, action: GameAction): GameState {
   switch (action.type) {
     case "MOVE_LEFT":
       if (
@@ -95,8 +92,6 @@ function gameReducer(
       // If can't move down, merge piece to board
       if (state.currentPiece) {
         const newBoard = mergePieceToBoard(state.currentPiece, state.board);
-
-        // Find completed rows
         const completedRows = newBoard.reduce((acc, row, index) => {
           if (row.every((cell) => cell !== null)) {
             acc.push(index);
@@ -105,50 +100,13 @@ function gameReducer(
         }, [] as number[]);
 
         if (completedRows.length > 0) {
-          // First, mark the rows for animation
-          const animatingBoard = newBoard.map((row, y) =>
-            row.map((block) =>
-              block && completedRows.includes(y)
-                ? { ...block, isClearing: true }
-                : block
-            )
-          );
-
-          // Set the animating state
-          setTimeout(() => {
-            // Remove completed rows and update remaining blocks' positions
-            let clearedBoard = newBoard
-              .filter((_, index) => !completedRows.includes(index))
-              .map((row, newY) =>
-                row.map((block) =>
-                  block
-                    ? {
-                        ...block,
-                        y: newY, // Update Y position for each block
-                        isClearing: false,
-                      }
-                    : null
-                )
-              );
-
-            // Add new empty rows at the top
-            const emptyRows = Array(completedRows.length)
-              .fill(null)
-              .map(() => Array(BOARD_WIDTH).fill(null));
-            clearedBoard = [...emptyRows, ...clearedBoard];
-
-            // Update the state with cleared board
-            dispatch({
-              type: "UPDATE_BOARD",
-              board: clearedBoard,
-              scoreIncrease: completedRows.length * 100,
-            });
-          }, 200);
-
           return {
             ...state,
             currentPiece: null,
-            board: animatingBoard,
+            pendingClear: {
+              board: newBoard,
+              rows: completedRows,
+            },
           };
         }
 
@@ -165,6 +123,7 @@ function gameReducer(
         ...state,
         board: action.board,
         score: state.score + action.scoreIncrease,
+        pendingClear: null,
       };
 
     case "HARD_DROP":
@@ -177,12 +136,29 @@ function gameReducer(
         }
         const droppedPiece = { ...state.currentPiece, y: newY };
         const newBoard = mergePieceToBoard(droppedPiece, state.board);
-        const clearedBoard = clearLines(newBoard);
+
+        const completedRows = newBoard.reduce((acc, row, index) => {
+          if (row.every((cell) => cell !== null)) {
+            acc.push(index);
+          }
+          return acc;
+        }, [] as number[]);
+
+        if (completedRows.length > 0) {
+          return {
+            ...state,
+            currentPiece: null,
+            pendingClear: {
+              board: newBoard,
+              rows: completedRows,
+            },
+          };
+        }
+
         return {
           ...state,
           currentPiece: null,
-          board: clearedBoard,
-          score: state.score + (clearedBoard !== newBoard ? 100 : 0),
+          board: newBoard,
         };
       }
       return state;
@@ -214,9 +190,9 @@ function gameReducer(
       const newBoard = state.board.filter(
         (_, index) => !action.rows.includes(index)
       );
-      while (newBoard.length < BOARD_HEIGHT) {
-        newBoard.unshift(Array(BOARD_WIDTH).fill(null));
-      }
+      //   while (newBoard.length < BOARD_HEIGHT) {
+      //     newBoard.unshift(Array(BOARD_WIDTH).fill(null));
+      //   }
       return {
         ...state,
         board: newBoard,
@@ -229,13 +205,10 @@ function gameReducer(
 }
 
 export default function TetrisGame() {
-  const [gameState, setGameState] = useReducer(
-    (state: GameState, action: GameAction) => {
-      const dispatch = setGameState; // Make dispatch available in reducer
-      return gameReducer(state, action, dispatch);
-    },
-    initialState
-  );
+  const [gameState, dispatch] = useReducer(gameReducer, {
+    ...initialState,
+    pendingClear: null,
+  });
   const gameOver$ = new Subject<void>();
 
   // Calculate current game speed based on score
@@ -261,7 +234,7 @@ export default function TetrisGame() {
     );
 
     const subscription = gameLoop$.subscribe(() => {
-      setGameState({ type: "MOVE_DOWN" });
+      dispatch({ type: "MOVE_DOWN" });
     });
 
     return () => {
@@ -275,17 +248,72 @@ export default function TetrisGame() {
     if (!gameState.currentPiece && !gameState.isGameOver) {
       const newPiece = createRandomPiece();
       if (isValidMove(newPiece, gameState.board)) {
-        setGameState({ type: "NEW_PIECE", piece: newPiece });
+        dispatch({ type: "NEW_PIECE", piece: newPiece });
       } else {
-        setGameState({ type: "GAME_OVER" });
+        dispatch({ type: "GAME_OVER" });
       }
     }
   }, [gameState.currentPiece, gameState.isGameOver]);
 
-  const moveLeft = useCallback(() => setGameState({ type: "MOVE_LEFT" }), []);
-  const moveRight = useCallback(() => setGameState({ type: "MOVE_RIGHT" }), []);
-  const rotate = useCallback(() => setGameState({ type: "ROTATE" }), []);
-  const hardDrop = useCallback(() => setGameState({ type: "HARD_DROP" }), []);
+  // Handle row clearing animation
+  useEffect(() => {
+    if (gameState.pendingClear) {
+      const { board: newBoard, rows: completedRows } = gameState.pendingClear;
+
+      // First, show animation
+      dispatch({
+        type: "UPDATE_BOARD",
+        board: newBoard.map((row, y) =>
+          row.map((block) =>
+            block && completedRows.includes(y)
+              ? { ...block, isClearing: true }
+              : block
+          )
+        ),
+        scoreIncrease: 0,
+      });
+
+      // Then update the board after animation
+      const timeoutId = setTimeout(() => {
+        // First, remove completed rows
+        let clearedBoard = newBoard.filter(
+          (_, index) => !completedRows.includes(index)
+        );
+
+        // Then shift all remaining blocks down
+        clearedBoard = clearedBoard.map((row, newY) =>
+          row.map((block) =>
+            block
+              ? {
+                  ...block,
+                  y: BOARD_HEIGHT - clearedBoard.length + newY, // Position from bottom up
+                  isClearing: false,
+                }
+              : null
+          )
+        );
+
+        // Add new empty rows at the top
+        const emptyRows = Array(completedRows.length)
+          .fill(null)
+          .map(() => Array(BOARD_WIDTH).fill(null));
+        clearedBoard = [...emptyRows, ...clearedBoard];
+
+        dispatch({
+          type: "UPDATE_BOARD",
+          board: clearedBoard,
+          scoreIncrease: completedRows.length * 100,
+        });
+      }, 200);
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [gameState.pendingClear]);
+
+  const moveLeft = useCallback(() => dispatch({ type: "MOVE_LEFT" }), []);
+  const moveRight = useCallback(() => dispatch({ type: "MOVE_RIGHT" }), []);
+  const rotate = useCallback(() => dispatch({ type: "ROTATE" }), []);
+  const hardDrop = useCallback(() => dispatch({ type: "HARD_DROP" }), []);
 
   return (
     <View style={styles.container}>
