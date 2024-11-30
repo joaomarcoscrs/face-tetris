@@ -15,23 +15,38 @@ export default function HomeScreen() {
       style={styles.container}
       resizeMode="contain"
     >
-      <View style={styles.overlay}>
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity
-            style={styles.playButton}
-            onPress={() => {
-              // Will add functionality later
-            }}
+      <View style={styles.titleContainer}>
+        <View style={styles.titleWrapper}>
+          <Text
+            style={[styles.titleText, { color: CustomDarkTheme.colors.accent }]}
           >
-            <Ionicons
-              name="play"
-              size={40}
-              color={CustomDarkTheme.colors.background}
-              style={styles.playIcon}
-            />
-            <Text style={styles.buttonText}>play</Text>
-          </TouchableOpacity>
+            face
+          </Text>
+          <Text
+            style={[
+              styles.titleText,
+              { color: CustomDarkTheme.colors.primary },
+            ]}
+          >
+            tetris
+          </Text>
         </View>
+      </View>
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity
+          style={styles.playButton}
+          onPress={() => {
+            // Will add functionality later
+          }}
+        >
+          <Ionicons
+            name="play"
+            size={40}
+            color={CustomDarkTheme.colors.background}
+            style={styles.playIcon}
+          />
+          <Text style={styles.buttonText}>play</Text>
+        </TouchableOpacity>
       </View>
     </ImageBackground>
   );
@@ -41,9 +56,21 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  overlay: {
-    flex: 1,
-    backgroundColor: `${CustomDarkTheme.colors.background}CC`,
+  titleContainer: {
+    position: "absolute",
+    top: 60,
+    left: 0,
+    right: 0,
+    alignItems: "center",
+  },
+  titleWrapper: {
+    flexDirection: "row",
+  },
+  titleText: {
+    fontFamily: "JetBrainsMono_700Bold",
+    fontSize: 48,
+    letterSpacing: 2,
+    textTransform: "lowercase",
   },
   buttonContainer: {
     position: "absolute",
