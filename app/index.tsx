@@ -30,7 +30,7 @@ export default function HomeScreen() {
       {
         scale: bgAnim.interpolate({
           inputRange: [0, 1],
-          outputRange: [1, 1.1],
+          outputRange: [0.9, 1.2],
         }),
       },
     ],
