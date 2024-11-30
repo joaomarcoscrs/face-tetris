@@ -16,6 +16,11 @@ import { interval, Subject, fromEvent } from "rxjs";
 import { filter, takeUntil } from "rxjs/operators";
 import { GAME_OVER_LINE } from "./TetrisBoard";
 import GameOverOverlay from "./GameOverOverlay";
+import {
+  BASE_SPEED,
+  SPEED_INCREASE_FACTOR,
+  LEVEL_THRESHOLD,
+} from "../constants/tetris";
 
 const initialState: GameState = {
   currentPiece: null,
@@ -146,6 +151,16 @@ export default function TetrisGame() {
   const [gameState, dispatch] = useReducer(gameReducer, initialState);
   const gameOver$ = new Subject<void>();
 
+  // Calculate current game speed based on score
+  const currentSpeed = Math.max(
+    BASE_SPEED *
+      Math.pow(
+        SPEED_INCREASE_FACTOR,
+        Math.floor(gameState.score / LEVEL_THRESHOLD)
+      ),
+    100 // Minimum speed cap at 100ms
+  );
+
   // Game loop using RxJS
   useEffect(() => {
     if (gameState.isGameOver) {
@@ -153,7 +168,7 @@ export default function TetrisGame() {
       return;
     }
 
-    const gameLoop$ = interval(1000).pipe(
+    const gameLoop$ = interval(currentSpeed).pipe(
       takeUntil(gameOver$),
       filter(() => !gameState.isGameOver)
     );
@@ -166,7 +181,7 @@ export default function TetrisGame() {
       subscription.unsubscribe();
       gameOver$.complete();
     };
-  }, [gameState.isGameOver]);
+  }, [gameState.isGameOver, currentSpeed]);
 
   // Spawn new pieces
   useEffect(() => {
