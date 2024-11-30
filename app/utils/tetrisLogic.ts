@@ -1,5 +1,6 @@
 import { BOARD_WIDTH, BOARD_HEIGHT, PIECES } from "../constants/tetris";
 import { TetrisPiece, TetrisBlock, GameState } from "../types/tetris";
+import { LogBox } from "react-native";
 
 export const createEmptyBoard = () =>
   Array(BOARD_HEIGHT)
@@ -98,7 +99,9 @@ export const clearCompletedRows = (
 
     // Update y-coordinates of remaining blocks
     newBoard = newBoard.map((row, y) =>
-      row.map((block) => (block ? { ...block, y } : null))
+      row.map((block) =>
+        block ? { ...block, y: block.y + completedRows.length } : null
+      )
     );
   }
 

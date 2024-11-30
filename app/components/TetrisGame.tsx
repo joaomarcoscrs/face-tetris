@@ -121,7 +121,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
     case "UPDATE_BOARD":
       return {
         ...state,
-        board: action.board,
+        board: clearCompletedRows(action.board),
         score: state.score + action.scoreIncrease,
         pendingClear: null,
       };
@@ -137,28 +137,10 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         const droppedPiece = { ...state.currentPiece, y: newY };
         const newBoard = mergePieceToBoard(droppedPiece, state.board);
 
-        const completedRows = newBoard.reduce((acc, row, index) => {
-          if (row.every((cell) => cell !== null)) {
-            acc.push(index);
-          }
-          return acc;
-        }, [] as number[]);
-
-        if (completedRows.length > 0) {
-          return {
-            ...state,
-            currentPiece: null,
-            pendingClear: {
-              board: newBoard,
-              rows: completedRows,
-            },
-          };
-        }
-
         return {
           ...state,
           currentPiece: null,
-          board: newBoard,
+          board: clearCompletedRows(newBoard),
         };
       }
       return state;
@@ -187,33 +169,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       };
 
     case "CLEAR_ROWS": {
-      // Create a temporary array of all non-completed rows
-      const remainingRows = [];
-      for (let y = 0; y < BOARD_HEIGHT; y++) {
-        if (!action.rows.includes(y)) {
-          remainingRows.push(state.board[y]);
-        }
-      }
-
-      // Create the new board starting with empty rows
-      const updatedBoard = Array(BOARD_HEIGHT)
-        .fill(null)
-        .map(() => Array(BOARD_WIDTH).fill(null));
-
-      // Fill the board from bottom to top
-      let currentRow = BOARD_HEIGHT - 1;
-      for (let i = remainingRows.length - 1; i >= 0; i--) {
-        remainingRows[i].forEach((block, x) => {
-          if (block) {
-            updatedBoard[currentRow][x] = {
-              ...block,
-              y: currentRow,
-            };
-          }
-        });
-        currentRow--;
-      }
-
+      const updatedBoard = clearCompletedRows(state.board);
       return {
         ...state,
         board: updatedBoard,
