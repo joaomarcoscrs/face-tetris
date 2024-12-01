@@ -39,3 +39,7 @@ export type GameAction =
       board: (TetrisBlock | null)[][];
       scoreIncrease: number;
     };
+
+export interface GameProps {
+  useFacialControls?: boolean;
+}

@@ -40,7 +40,8 @@
     "react-native-screens": "~4.1.0",
     "react-native-web": "~0.19.13",
     "react-native-webview": "13.12.2",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "expo-camera": "~16.0.7"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

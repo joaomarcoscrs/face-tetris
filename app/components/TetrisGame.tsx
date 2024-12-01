@@ -23,6 +23,8 @@ import {
 } from "../constants/tetris";
 import ScoreDisplay from "./ScoreDisplay";
 import { BOARD_WIDTH } from "../constants/tetris";
+import { useLocalSearchParams } from "expo-router";
+import CameraPreview from "./CameraPreview";
 
 const initialState: GameState = {
   currentPiece: null,
@@ -183,6 +185,8 @@ function gameReducer(state: GameState, action: GameAction): GameState {
 }
 
 export default function TetrisGame() {
+  const { useFacialControls } = useLocalSearchParams();
+  const showFacialControls = useFacialControls === "true";
   const [gameState, dispatch] = useReducer(gameReducer, {
     ...initialState,
     pendingClear: null,
@@ -303,43 +307,47 @@ export default function TetrisGame() {
       <ScoreDisplay score={gameState.score} />
       <TetrisBoard gameState={gameState} />
 
-      <View style={styles.controls}>
-        <TouchableOpacity onPress={moveLeft} style={styles.controlButton}>
-          <Ionicons
-            name="arrow-back"
-            size={30}
-            color={CustomDarkTheme.colors.secondary}
-          />
-        </TouchableOpacity>
+      {showFacialControls && <CameraPreview />}
 
-        <TouchableOpacity onPress={rotate} style={styles.controlButton}>
-          <Ionicons
-            name="refresh"
-            size={30}
-            color={CustomDarkTheme.colors.secondary}
-          />
-        </TouchableOpacity>
+      {!showFacialControls && (
+        <View style={styles.controls}>
+          <TouchableOpacity onPress={moveLeft} style={styles.controlButton}>
+            <Ionicons
+              name="arrow-back"
+              size={30}
+              color={CustomDarkTheme.colors.secondary}
+            />
+          </TouchableOpacity>
 
-        <TouchableOpacity onPress={moveRight} style={styles.controlButton}>
-          <Ionicons
-            name="arrow-forward"
-            size={30}
-            color={CustomDarkTheme.colors.secondary}
-          />
-        </TouchableOpacity>
+          <TouchableOpacity onPress={rotate} style={styles.controlButton}>
+            <Ionicons
+              name="refresh"
+              size={30}
+              color={CustomDarkTheme.colors.secondary}
+            />
+          </TouchableOpacity>
 
-        <TouchableOpacity
-          onPressIn={startSoftDrop}
-          onPressOut={endSoftDrop}
-          style={styles.controlButton}
-        >
-          <Ionicons
-            name="arrow-down"
-            size={30}
-            color={CustomDarkTheme.colors.secondary}
-          />
-        </TouchableOpacity>
-      </View>
+          <TouchableOpacity onPress={moveRight} style={styles.controlButton}>
+            <Ionicons
+              name="arrow-forward"
+              size={30}
+              color={CustomDarkTheme.colors.secondary}
+            />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPressIn={startSoftDrop}
+            onPressOut={endSoftDrop}
+            style={styles.controlButton}
+          >
+            <Ionicons
+              name="arrow-down"
+              size={30}
+              color={CustomDarkTheme.colors.secondary}
+            />
+          </TouchableOpacity>
+        </View>
+      )}
 
       {gameState.isGameOver && <GameOverOverlay />}
     </View>

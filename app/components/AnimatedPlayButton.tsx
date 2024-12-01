@@ -9,12 +9,14 @@ import { useEffect, useRef } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { CustomDarkTheme } from "../../constants/theme";
 import { useRouter } from "expo-router";
+import { useCameraPermissions } from "expo-camera";
 
 export default function AnimatedPlayButton() {
   const router = useRouter();
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const pressAnim = useRef(new Animated.Value(1)).current;
   const playRotateAnim = useRef(new Animated.Value(0)).current;
+  const [permission, requestPermission] = useCameraPermissions();
 
   useEffect(() => {
     // Pulsing play button animation
@@ -64,9 +66,27 @@ export default function AnimatedPlayButton() {
     }).start();
   };
 
-  const handlePress = () => {
-    // Navigate to the game screen
-    router.push("/(tabs)/game");
+  const requestCameraPermission = async () => {
+    if (!permission) {
+      await requestPermission();
+    }
+
+    if (permission?.granted) {
+      router.push({
+        pathname: "/(tabs)/game",
+        params: { useFacialControls: "true" },
+      });
+    } else {
+      // If denied, just start the game without facial controls
+      router.push({
+        pathname: "/(tabs)/game",
+        params: { useFacialControls: "false" },
+      });
+    }
+  };
+
+  const handlePress = async () => {
+    await requestCameraPermission();
   };
 
   const playButtonTransform = {
