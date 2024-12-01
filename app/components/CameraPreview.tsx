@@ -1,10 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, View, Text } from "react-native";
 import { CameraView, CameraType, useCameraPermissions } from "expo-camera";
 import { interval } from "rxjs";
 import { switchMap, catchError, filter } from "rxjs/operators";
 import axios from "axios";
 import { ROBOFLOW_API_KEY } from "@env";
+import { CustomDarkTheme } from "../../constants/theme";
 
 const MODEL_URL =
   "https://joaomarcos-inference.ngrok.app/facial-features-3xkvb/2";
@@ -16,6 +17,7 @@ export default function CameraPreview() {
   const cameraRef = useRef<CameraView>(null);
   const [isCameraReady, setIsCameraReady] = useState(false);
   const isCapturing = useRef(false);
+  const [latency, setLatency] = useState<number | null>(null);
 
   useEffect(() => {
     if (!permission?.granted || !isCameraReady) return;
@@ -60,6 +62,8 @@ export default function CameraPreview() {
               `Predictions count: ${response.data.predictions.length}`
             );
 
+            setLatency(requestTime);
+
             return response.data;
           } catch (error) {
             if (axios.isAxiosError(error)) {
@@ -101,6 +105,11 @@ export default function CameraPreview() {
         animateShutter={false}
         onCameraReady={() => setIsCameraReady(true)}
       />
+      {latency !== null && (
+        <View style={styles.latencyContainer}>
+          <Text style={styles.latencyText}>Latency: {latency}ms</Text>
+        </View>
+      )}
     </View>
   );
 }
@@ -125,5 +134,18 @@ const styles = StyleSheet.create({
   },
   camera: {
     flex: 1,
+  },
+  latencyContainer: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.5)",
+    paddingVertical: 2,
+  },
+  latencyText: {
+    color: CustomDarkTheme.colors.primary,
+    fontSize: 10,
   },
 });
