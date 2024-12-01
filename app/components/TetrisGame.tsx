@@ -1,4 +1,4 @@
-import React, { useReducer, useEffect, useCallback } from "react";
+import React, { useReducer, useEffect, useCallback, useState } from "react";
 import { View, StyleSheet, TouchableOpacity } from "react-native";
 import { GameState, GameAction } from "../types/tetris";
 import {
@@ -199,14 +199,20 @@ export default function TetrisGame() {
     100 // Minimum speed cap at 100ms
   );
 
-  // Game loop using RxJS
+  // First, add a state to track if soft drop is active
+  const [isSoftDrop, setIsSoftDrop] = useState(false);
+
+  // Modify the game loop to use a faster speed during soft drop
   useEffect(() => {
     if (gameState.isGameOver) {
       gameOver$.next();
       return;
     }
 
-    const gameLoop$ = interval(currentSpeed).pipe(
+    // Use a faster speed during soft drop (e.g., 5x faster)
+    const dropSpeed = isSoftDrop ? currentSpeed / 5 : currentSpeed * 2;
+
+    const gameLoop$ = interval(dropSpeed).pipe(
       takeUntil(gameOver$),
       filter(() => !gameState.isGameOver)
     );
@@ -219,7 +225,7 @@ export default function TetrisGame() {
       subscription.unsubscribe();
       gameOver$.complete();
     };
-  }, [gameState.isGameOver, currentSpeed]);
+  }, [gameState.isGameOver, currentSpeed, isSoftDrop]);
 
   // Spawn new pieces
   useEffect(() => {
@@ -289,7 +295,8 @@ export default function TetrisGame() {
   const moveLeft = useCallback(() => dispatch({ type: "MOVE_LEFT" }), []);
   const moveRight = useCallback(() => dispatch({ type: "MOVE_RIGHT" }), []);
   const rotate = useCallback(() => dispatch({ type: "ROTATE" }), []);
-  const hardDrop = useCallback(() => dispatch({ type: "HARD_DROP" }), []);
+  const startSoftDrop = useCallback(() => setIsSoftDrop(true), []);
+  const endSoftDrop = useCallback(() => setIsSoftDrop(false), []);
 
   return (
     <View style={styles.container}>
@@ -321,7 +328,11 @@ export default function TetrisGame() {
           />
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={hardDrop} style={styles.controlButton}>
+        <TouchableOpacity
+          onPressIn={startSoftDrop}
+          onPressOut={endSoftDrop}
+          style={styles.controlButton}
+        >
           <Ionicons
             name="arrow-down"
             size={30}
