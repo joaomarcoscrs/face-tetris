@@ -12,7 +12,7 @@ import {
 import TetrisBoard from "./TetrisBoard";
 import { Ionicons } from "@expo/vector-icons";
 import { CustomDarkTheme } from "../../constants/theme";
-import { interval, Subject, fromEvent } from "rxjs";
+import { interval, Subject } from "rxjs";
 import { filter, takeUntil } from "rxjs/operators";
 import { GAME_OVER_LINE } from "./TetrisBoard";
 import GameOverOverlay from "./GameOverOverlay";
@@ -22,7 +22,7 @@ import {
   LEVEL_THRESHOLD,
 } from "../constants/tetris";
 import ScoreDisplay from "./ScoreDisplay";
-import { BOARD_WIDTH, BOARD_HEIGHT } from "../constants/tetris";
+import { BOARD_WIDTH } from "../constants/tetris";
 
 const initialState: GameState = {
   currentPiece: null,

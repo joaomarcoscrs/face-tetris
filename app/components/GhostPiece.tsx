@@ -3,6 +3,7 @@ import { View, StyleSheet } from "react-native";
 import { TetrisPiece, TetrisBlock } from "../types/tetris";
 import { BLOCK_SIZE } from "../constants/tetris";
 import { isValidMove } from "../utils/tetrisLogic";
+import { CustomDarkTheme } from "@/constants/theme";
 
 interface Props {
   currentPiece: TetrisPiece;
@@ -39,8 +40,9 @@ const styles = StyleSheet.create({
     position: "absolute",
     width: BLOCK_SIZE,
     height: BLOCK_SIZE,
+    backgroundColor: CustomDarkTheme.colors.card,
     borderWidth: 2,
-    borderColor: "rgba(255, 255, 255, 0.2)",
+    borderColor: CustomDarkTheme.colors.border,
     borderRadius: 4,
   },
 });
