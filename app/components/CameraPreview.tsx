@@ -4,8 +4,8 @@ import { CameraView, CameraType, useCameraPermissions } from "expo-camera";
 import { interval } from "rxjs";
 import { switchMap, catchError, filter } from "rxjs/operators";
 import axios from "axios";
+import { ROBOFLOW_API_KEY } from "@env";
 
-const API_KEY = "YOUR_KEY";
 const MODEL_URL = "https://detect.roboflow.com/your-model/42";
 const CAPTURE_INTERVAL = 100;
 
@@ -45,7 +45,7 @@ export default function CameraPreview() {
               method: "POST",
               url: MODEL_URL,
               params: {
-                api_key: API_KEY,
+                api_key: ROBOFLOW_API_KEY,
               },
               data: photo.base64,
               headers: {
