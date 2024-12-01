@@ -18,8 +18,10 @@ export default function ScoreDisplay({ score }: Props) {
 const styles = StyleSheet.create({
   container: {
     position: "absolute",
-    top: 40,
-    left: 20,
+    top: 60,
+    left: 0,
+    right: 0,
+    alignItems: "center",
     zIndex: 100,
   },
   label: {

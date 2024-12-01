@@ -1,5 +1,5 @@
 import React, { useReducer, useEffect, useCallback, useState } from "react";
-import { View, StyleSheet, TouchableOpacity } from "react-native";
+import { View, StyleSheet, TouchableOpacity, Text } from "react-native";
 import { GameState, GameAction } from "../types/tetris";
 import {
   createEmptyBoard,
@@ -25,6 +25,7 @@ import ScoreDisplay from "./ScoreDisplay";
 import { BOARD_WIDTH } from "../constants/tetris";
 import { useLocalSearchParams } from "expo-router";
 import CameraPreview from "./CameraPreview";
+import { router } from "expo-router";
 
 const initialState: GameState = {
   currentPiece: null,
@@ -302,8 +303,26 @@ export default function TetrisGame() {
   const startSoftDrop = useCallback(() => setIsSoftDrop(true), []);
   const endSoftDrop = useCallback(() => setIsSoftDrop(false), []);
 
+  const handleGoBack = useCallback(() => {
+    // Clean up any game state if needed
+    if (gameOver$) {
+      gameOver$.next();
+      gameOver$.complete();
+    }
+    router.replace("/"); // Navigate to index.tsx
+  }, [gameOver$]);
+
   return (
     <View style={styles.container}>
+      <TouchableOpacity style={styles.backButton} onPress={handleGoBack}>
+        <Ionicons
+          name="arrow-undo"
+          size={20}
+          color={CustomDarkTheme.colors.primary}
+        />
+        <Text style={styles.backButtonText}>back</Text>
+      </TouchableOpacity>
+
       <ScoreDisplay score={gameState.score} />
       <TetrisBoard gameState={gameState} />
 
@@ -372,5 +391,19 @@ const styles = StyleSheet.create({
     height: 60,
     justifyContent: "center",
     alignItems: "center",
+  },
+  backButton: {
+    position: "absolute",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    top: 80,
+    left: 20,
+    zIndex: 10,
+  },
+  backButtonText: {
+    color: CustomDarkTheme.colors.secondary,
+    fontFamily: "JetBrainsMono_700Bold",
+    fontSize: 18,
   },
 });
