@@ -6,12 +6,13 @@ import { switchMap, catchError, filter } from "rxjs/operators";
 import axios from "axios";
 import { ROBOFLOW_API_KEY } from "@env";
 
-const MODEL_URL = "https://detect.roboflow.com/your-model/42";
+const MODEL_URL =
+  "https://joaomarcos-inference.ngrok.app/facial-features-3xkvb/2";
 const CAPTURE_INTERVAL = 100;
 
 export default function CameraPreview() {
   const facing: CameraType = "front";
-  const [permission, requestPermission] = useCameraPermissions();
+  const [permission] = useCameraPermissions();
   const cameraRef = useRef<CameraView>(null);
   const [isCameraReady, setIsCameraReady] = useState(false);
   const isCapturing = useRef(false);
@@ -63,7 +64,7 @@ export default function CameraPreview() {
           } catch (error) {
             if (axios.isAxiosError(error)) {
               console.error(
-                `API Error: ${error.response?.status} - ${error.message}`
+                `API Error: ${error.response?.status} - ${error.message}. Request made using API key: ${ROBOFLOW_API_KEY}`
               );
             } else {
               console.error("Camera Error:", error);
