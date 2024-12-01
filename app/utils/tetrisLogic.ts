@@ -2,13 +2,16 @@ import { BOARD_WIDTH, BOARD_HEIGHT, PIECES } from "../constants/tetris";
 import { TetrisPiece, TetrisBlock, GameState } from "../types/tetris";
 import { LogBox } from "react-native";
 
+let lastPieceColorIndex = 0;
+
 export const createEmptyBoard = () =>
   Array(BOARD_HEIGHT)
     .fill(null)
     .map(() => Array(BOARD_WIDTH).fill(null));
 
 export const createRandomPiece = (): TetrisPiece => {
-  const pieceTemplate = PIECES[Math.floor(Math.random() * PIECES.length)];
+  const pieceTemplate = PIECES[lastPieceColorIndex];
+  lastPieceColorIndex = (lastPieceColorIndex + 1) % PIECES.length;
   return {
     blocks: pieceTemplate.blocks.map((block) => ({
       ...block,
