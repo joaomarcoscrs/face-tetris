@@ -36,7 +36,7 @@ export default function CameraPreview() {
           try {
             isCapturing.current = true;
             const photo = await cameraRef.current.takePictureAsync({
-              quality: 0.1,
+              quality: 0.7,
               base64: true,
               shutterSound: false,
               skipProcessing: true,
@@ -70,13 +70,16 @@ export default function CameraPreview() {
 
             const requestTime = Date.now() - startTime;
             console.log(
-              `Action: ${response.data?.outputs?.[0]?.action ?? "nothing"}`
+              `Response data: ${JSON.stringify(response.data)}`,
+              `Action: ${response.data?.outputs?.[0]?.action ?? "nothing"}`,
+              `Debug Info: ${JSON.stringify(
+                response.data?.outputs?.[0]?.debug_info
+              )}`
             );
 
             setLatency(requestTime);
 
             const action = response.data?.outputs?.[0]?.action;
-            console.log(`Action: ${action}`);
 
             // Map and emit game action if valid
             const gameAction = mapFaceDirectionToGameAction(action);
