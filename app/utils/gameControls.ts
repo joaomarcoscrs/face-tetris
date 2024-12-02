@@ -21,6 +21,8 @@ export function mapFaceDirectionToGameAction(
       return "moveRight";
     case "looking_up":
       return "rotateRight";
+    case "looking_down":
+      return "softDrop";
     default:
       return null;
   }

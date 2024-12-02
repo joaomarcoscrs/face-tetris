@@ -216,8 +216,8 @@ export default function TetrisGame() {
       return;
     }
 
-    // Use a faster speed during soft drop (e.g., 5x faster)
-    const dropSpeed = isSoftDrop ? currentSpeed / 5 : currentSpeed * 2;
+    // Use a faster speed during soft drop (e.g., 2x faster)
+    const dropSpeed = isSoftDrop ? currentSpeed / 2 : currentSpeed;
 
     const gameLoop$ = interval(dropSpeed).pipe(
       takeUntil(gameOver$),

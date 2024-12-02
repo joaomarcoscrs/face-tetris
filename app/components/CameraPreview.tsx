@@ -36,7 +36,7 @@ export default function CameraPreview() {
           try {
             isCapturing.current = true;
             const photo = await cameraRef.current.takePictureAsync({
-              quality: 0.7,
+              quality: 0.2,
               base64: true,
               shutterSound: false,
               skipProcessing: true,
