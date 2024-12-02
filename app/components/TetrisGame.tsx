@@ -27,6 +27,7 @@ import { useLocalSearchParams } from "expo-router";
 import CameraPreview from "./CameraPreview";
 import { router } from "expo-router";
 import BackButton from "./BackButton";
+import { gameActionSubject } from "../utils/gameControls";
 
 const initialState: GameState = {
   currentPiece: null,
@@ -311,6 +312,30 @@ export default function TetrisGame() {
     }
     router.replace("/");
   }, [gameOver$]);
+
+  useEffect(() => {
+    const subscription = gameActionSubject.subscribe((action: GameAction) => {
+      switch (action) {
+        case "moveLeft":
+          moveLeft();
+          break;
+        case "moveRight":
+          moveRight();
+          break;
+        case "rotateRight":
+          rotate();
+          break;
+        case "softDrop":
+          startSoftDrop();
+          break;
+        case "hardDrop":
+          // Implement hard drop if needed
+          break;
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [moveLeft, moveRight, rotate, startSoftDrop]);
 
   return (
     <View style={styles.container}>

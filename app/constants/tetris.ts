@@ -5,7 +5,7 @@ export const BOARD_WIDTH = 10;
 export const BOARD_HEIGHT = 20;
 export const BLOCK_SIZE = 30;
 
-export const BASE_SPEED = 600; // Half a second
+export const BASE_SPEED = 300;
 export const SPEED_INCREASE_FACTOR = 0.9; // Multiply speed by this after each level
 export const LEVEL_THRESHOLD = 1000; // Score needed to increase level
 

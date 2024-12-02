@@ -74,47 +74,75 @@ def get_face_direction(detections):
         eyes.sort(key=lambda x: x["x"])
         left_eye, right_eye = eyes[:2]
 
-        # Calculate relative positions
+        # Calculate eye midpoints first!
         eye_midpoint_x = (left_eye["x"] + right_eye["x"]) / 2
-        mouth_x = mouth["x"] if mouth else None
-        nose_x = nose["x"] if nose else None
         eye_midpoint_y = (left_eye["y"] + right_eye["y"]) / 2
-        mouth_y = mouth["y"] if mouth else None
-        nose_y = nose["y"] if nose else None
-        
-        face_center_x = mouth_x if mouth_x else nose_x
 
-        # Calculate ratios and offsets
+        # Calculate relative positions and ratios
         eye_width_ratio = right_eye["width"] / left_eye["width"]
-        horizontal_offset = abs(face_center_x - eye_midpoint_x)
-        mouth_vertical_offset = mouth_y - eye_midpoint_y if mouth_y else None
-        nose_vertical_offset = nose_y - eye_midpoint_y if nose_y else None
+        
+        # Calculate vertical distances relative to eye distance
+        eye_distance = abs(right_eye["x"] - left_eye["x"])  # Use this as our base unit
+        
+        if mouth:
+            # Normalize vertical and horizontal offsets by eye distance
+            mouth_vertical_ratio = (mouth["y"] - eye_midpoint_y) / eye_distance
+            mouth_horizontal_ratio = abs(mouth["x"] - eye_midpoint_x) / eye_distance
+        
+        if nose:
+            nose_vertical_ratio = (nose["y"] - eye_midpoint_y) / eye_distance
+            nose_horizontal_ratio = abs(nose["x"] - eye_midpoint_x) / eye_distance
 
-        # Thresholds
-        EYE_RATIO_THRESHOLD = 1.4
-        HORIZONTAL_OFFSET_THRESHOLD = 50
-        MOUTH_VERTICAL_OFFSET_MIN = 90
-        MOUTH_VERTICAL_OFFSET_MAX = 140
-        NOSE_VERTICAL_OFFSET_MIN = 90
-        NOSE_VERTICAL_OFFSET_MAX = 140
+        # Relative thresholds
+        EYE_RATIO_THRESHOLD = 1.3  # This is already relative
+        HORIZONTAL_RATIO_THRESHOLD = 0.4  # Horizontal offset should be less than 40% of eye distance
+        VERTICAL_RATIO_MIN = 0.9  # Increased from 0.8 to make looking_up more sensitive
+        VERTICAL_RATIO_MAX = 1.6  # Increased from 1.4 to make looking_down less sensitive
+        CENTER_RATIO = 1.2  # Adjusted from 1.1 based on typical face proportions
+        CENTER_TOLERANCE = 0.25  # Increased from 0.2 to make center detection more stable
 
-        # Determine direction based on feature positions
+        # Debug prints
+        print(f"Debug - Eye distance: {eye_distance}")
+        if mouth:
+            print(f"Debug - Mouth vertical ratio: {mouth_vertical_ratio}")
+            print(f"Debug - Mouth horizontal ratio: {mouth_horizontal_ratio}")
+        if nose:
+            print(f"Debug - Nose vertical ratio: {nose_vertical_ratio}")
+            print(f"Debug - Nose horizontal ratio: {nose_horizontal_ratio}")
+
+        # Determine direction based on relative positions
         if eye_width_ratio > EYE_RATIO_THRESHOLD:
-            return "looking_left"
-        elif eye_width_ratio < 1/EYE_RATIO_THRESHOLD:
             return "looking_right"
-        elif horizontal_offset > HORIZONTAL_OFFSET_THRESHOLD:
-            return "looking_right" if mouth_x < eye_midpoint_x else "looking_left"
-        elif mouth_vertical_offset and (mouth_vertical_offset < MOUTH_VERTICAL_OFFSET_MIN or mouth_vertical_offset > MOUTH_VERTICAL_OFFSET_MAX):
-            return "looking_up" if mouth_vertical_offset < MOUTH_VERTICAL_OFFSET_MIN else "looking_down"
-        elif nose_vertical_offset and (nose_vertical_offset < NOSE_VERTICAL_OFFSET_MIN or nose_vertical_offset > NOSE_VERTICAL_OFFSET_MAX):
-            return "looking_up" if nose_vertical_offset < NOSE_VERTICAL_OFFSET_MIN else "looking_down"
-        else:
-            return "center"
+        elif eye_width_ratio < 1/EYE_RATIO_THRESHOLD:
+            return "looking_left"
+        
+        # Check vertical direction using mouth if available
+        if mouth:
+            if abs(mouth_vertical_ratio - CENTER_RATIO) < CENTER_TOLERANCE:
+                return "center"
+            if mouth_vertical_ratio < VERTICAL_RATIO_MIN:
+                return "looking_up"
+            if mouth_vertical_ratio > VERTICAL_RATIO_MAX:
+                return "looking_down"
+            if mouth_horizontal_ratio > HORIZONTAL_RATIO_THRESHOLD:
+                return "looking_left" if mouth["x"] < eye_midpoint_x else "looking_right"
+        
+        # If no mouth, try using nose
+        if nose:
+            if abs(nose_vertical_ratio - CENTER_RATIO) < CENTER_TOLERANCE:
+                return "center"
+            if nose_vertical_ratio < VERTICAL_RATIO_MIN:
+                return "looking_up"
+            if nose_vertical_ratio > VERTICAL_RATIO_MAX:
+                return "looking_down"
+            if nose_horizontal_ratio > HORIZONTAL_RATIO_THRESHOLD:
+                return "looking_left" if nose["x"] < eye_midpoint_x else "looking_right"
+
+        return "center"
 
     except Exception as e:
         print(f"Error in get_face_direction: {str(e)}")
-        return f"unknown-9: {str(e)}"  # Unexpected error with details
+        return f"unknown-9: {str(e)}"
 
 # --- Cant change that! This is needed for the workflow to work
 # Function definition will be auto-generated based on inputs

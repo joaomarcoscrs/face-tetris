@@ -6,9 +6,14 @@ import { switchMap, catchError, filter } from "rxjs/operators";
 import axios from "axios";
 import { ROBOFLOW_API_KEY } from "@env";
 import { CustomDarkTheme } from "../../constants/theme";
+import {
+  gameActionSubject,
+  mapFaceDirectionToGameAction,
+} from "../utils/gameControls";
 
-const MODEL_URL =
-  "https://joaomarcos-inference.ngrok.app/facial-features-3xkvb/2";
+const URL =
+  //   "https://joaomarcos-inference.ngrok.app/facial-features-3xkvb/2"; // model URL
+  "https://joaomarcos-inference.ngrok.app/infer/workflows/joao-marcos-3cjqf/tetris-controller";
 const CAPTURE_INTERVAL = 100;
 
 export default function CameraPreview() {
@@ -46,23 +51,38 @@ export default function CameraPreview() {
 
             const response = await axios({
               method: "POST",
-              url: MODEL_URL,
-              params: {
+              url: URL,
+              //   params: {
+              //     api_key: ROBOFLOW_API_KEY,
+              //   },
+              //   data: photo.base64,
+              data: {
                 api_key: ROBOFLOW_API_KEY,
+                inputs: {
+                  image: { type: "base64", value: photo.base64 },
+                },
               },
-              data: photo.base64,
               headers: {
-                "Content-Type": "application/x-www-form-urlencoded",
+                // "Content-Type": "application/x-www-form-urlencoded",
+                "Content-Type": "application/json",
               },
             });
 
             const requestTime = Date.now() - startTime;
-            console.log(`Request time: ${requestTime}ms`);
             console.log(
-              `Predictions count: ${response.data.predictions.length}`
+              `Action: ${response.data?.outputs?.[0]?.action ?? "nothing"}`
             );
 
             setLatency(requestTime);
+
+            const action = response.data?.outputs?.[0]?.action;
+            console.log(`Action: ${action}`);
+
+            // Map and emit game action if valid
+            const gameAction = mapFaceDirectionToGameAction(action);
+            if (gameAction) {
+              gameActionSubject.next(gameAction);
+            }
 
             return response.data;
           } catch (error) {
