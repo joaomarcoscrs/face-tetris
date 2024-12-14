@@ -64,13 +64,6 @@ export default function CameraPreview() {
             });
 
             const requestTime = Date.now() - startTime;
-            console.log(
-              `Response data: ${JSON.stringify(response.data)}`,
-              `Action: ${response.data?.outputs?.[0]?.action ?? "nothing"}`,
-              `Debug Info: ${JSON.stringify(
-                response.data?.outputs?.[0]?.debug_info
-              )}`
-            );
 
             setLatency(requestTime);
 
