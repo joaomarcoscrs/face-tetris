@@ -52,10 +52,6 @@ export default function CameraPreview() {
             const response = await axios({
               method: "POST",
               url: URL,
-              //   params: {
-              //     api_key: ROBOFLOW_API_KEY,
-              //   },
-              //   data: photo.base64,
               data: {
                 api_key: ROBOFLOW_API_KEY,
                 inputs: {
@@ -63,7 +59,6 @@ export default function CameraPreview() {
                 },
               },
               headers: {
-                // "Content-Type": "application/x-www-form-urlencoded",
                 "Content-Type": "application/json",
               },
             });
