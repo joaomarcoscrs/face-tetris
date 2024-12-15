@@ -4,13 +4,13 @@ import { CameraView, CameraType, useCameraPermissions } from "expo-camera";
 import { interval } from "rxjs";
 import { switchMap, catchError, filter } from "rxjs/operators";
 import axios from "axios";
-import { ROBOFLOW_API_KEY } from "@env";
 import { CustomDarkTheme } from "../../constants/theme";
 import {
   gameActionSubject,
   mapFaceDirectionToGameAction,
 } from "../utils/gameControls";
 
+const ROBOFLOW_API_KEY = process.env.ROBOFLOW_API_KEY;
 const URL =
   //   "https://joaomarcos-inference.ngrok.app/facial-features-3xkvb/2"; // model URL
   "https://joaomarcos-inference.ngrok.app/infer/workflows/joao-marcos-3cjqf/tetris-controller";

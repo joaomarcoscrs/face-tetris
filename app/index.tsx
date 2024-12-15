@@ -1,4 +1,4 @@
-import { View, StyleSheet, ImageBackground, Animated } from "react-native";
+import { StyleSheet, ImageBackground, Animated } from "react-native";
 import { useEffect, useRef } from "react";
 import { CustomDarkTheme } from "../constants/theme";
 import AnimatedTitle from "./components/AnimatedTitle";
