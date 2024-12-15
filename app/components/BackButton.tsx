@@ -13,12 +13,16 @@ export default function BackButton({ onPress }: Props) {
     if (onPress) {
       onPress();
     } else {
-      router.replace("/");
+      router.back();
     }
   };
 
   return (
-    <TouchableOpacity style={styles.backButton} onPress={handlePress}>
+    <TouchableOpacity
+      style={styles.backButton}
+      onPress={handlePress}
+      activeOpacity={0.7}
+    >
       <Ionicons
         name="arrow-undo"
         size={20}
@@ -37,7 +41,7 @@ const styles = StyleSheet.create({
     gap: 5,
     top: 80,
     left: 20,
-    zIndex: 10,
+    zIndex: 999,
   },
   backButtonText: {
     color: CustomDarkTheme.colors.secondary,

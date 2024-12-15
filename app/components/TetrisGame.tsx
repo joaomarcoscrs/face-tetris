@@ -310,7 +310,7 @@ export default function TetrisGame() {
       gameOver$.next();
       gameOver$.complete();
     }
-    router.replace("/");
+    router.back();
   }, [gameOver$]);
 
   useEffect(() => {

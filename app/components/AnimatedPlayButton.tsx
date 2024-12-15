@@ -67,7 +67,7 @@ export default function AnimatedPlayButton() {
   };
 
   const requestCameraPermission = async () => {
-    if (!permission) {
+    if (!permission || !permission.granted) {
       await requestPermission();
     }
 
