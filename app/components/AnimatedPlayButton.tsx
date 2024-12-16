@@ -16,7 +16,7 @@ export default function AnimatedPlayButton() {
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const pressAnim = useRef(new Animated.Value(1)).current;
   const playRotateAnim = useRef(new Animated.Value(0)).current;
-  const [permission, requestPermission] = useCameraPermissions();
+  const [permission] = useCameraPermissions();
 
   useEffect(() => {
     // Pulsing play button animation
@@ -66,27 +66,18 @@ export default function AnimatedPlayButton() {
     }).start();
   };
 
-  const requestCameraPermission = async () => {
-    if (!permission || !permission.granted) {
-      await requestPermission();
-    }
-
+  const handlePress = () => {
     if (permission?.granted) {
       router.push({
         pathname: "/(tabs)/game",
         params: { useFacialControls: "true" },
       });
     } else {
-      // If denied, just start the game without facial controls
       router.push({
         pathname: "/(tabs)/game",
         params: { useFacialControls: "false" },
       });
     }
-  };
-
-  const handlePress = async () => {
-    await requestCameraPermission();
   };
 
   const playButtonTransform = {
