@@ -41,7 +41,7 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera."
+          "cameraPermission": "The app uses your camera to track facial movements for controlling gameplay."
         }
       ]
     ],
