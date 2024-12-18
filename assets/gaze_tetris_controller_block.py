@@ -29,6 +29,12 @@ def run(self, yaw_degrees, pitch_degrees, left_threshold, right_threshold, up_th
     elif pitch < 0 and pitch < -down_threshold:
         down_score += abs(down_threshold - pitch)
         
+    # normalize scores relative to the threshold
+    right_score = right_score / right_threshold
+    left_score = left_score / left_threshold
+    up_score = up_score / up_threshold
+    down_score = down_score / down_threshold
+        
     if right_score == left_score == up_score == down_score:
         return { "action": "center"}
         
