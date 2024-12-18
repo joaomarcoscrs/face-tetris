@@ -75,6 +75,8 @@ export default function CameraPreview() {
               gameActionSubject.next(gameAction);
             }
 
+            console.log(`response.data: ${JSON.stringify(response.data)}`);
+
             return response.data;
           } catch (error) {
             if (axios.isAxiosError(error)) {

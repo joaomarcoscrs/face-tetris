@@ -28,6 +28,7 @@ import CameraPreview from "./CameraPreview";
 import { router } from "expo-router";
 import BackButton from "./BackButton";
 import { gameActionSubject } from "../utils/gameControls";
+import { GameActionType, ControlAction } from "../types/tetris";
 
 const initialState: GameState = {
   currentPiece: null,
@@ -187,6 +188,23 @@ function gameReducer(state: GameState, action: GameAction): GameState {
   }
 }
 
+function mapControlToGameAction(control: ControlAction): GameActionType {
+  switch (control) {
+    case "moveLeft":
+      return { type: "MOVE_LEFT" };
+    case "moveRight":
+      return { type: "MOVE_RIGHT" };
+    case "rotateRight":
+      return { type: "ROTATE" };
+    case "softDrop":
+      return { type: "MOVE_DOWN" };
+    case "hardDrop":
+      return { type: "HARD_DROP" };
+    default:
+      throw new Error(`Unknown control action: ${control}`);
+  }
+}
+
 export default function TetrisGame() {
   const { useFacialControls } = useLocalSearchParams();
   const showFacialControls = useFacialControls === "true";
@@ -299,12 +317,6 @@ export default function TetrisGame() {
     }
   }, [gameState.pendingClear]);
 
-  const moveLeft = useCallback(() => dispatch({ type: "MOVE_LEFT" }), []);
-  const moveRight = useCallback(() => dispatch({ type: "MOVE_RIGHT" }), []);
-  const rotate = useCallback(() => dispatch({ type: "ROTATE" }), []);
-  const startSoftDrop = useCallback(() => setIsSoftDrop(true), []);
-  const endSoftDrop = useCallback(() => setIsSoftDrop(false), []);
-
   const handleGoBack = useCallback(() => {
     if (gameOver$) {
       gameOver$.next();
@@ -314,28 +326,33 @@ export default function TetrisGame() {
   }, [gameOver$]);
 
   useEffect(() => {
-    const subscription = gameActionSubject.subscribe((action: GameAction) => {
-      switch (action) {
-        case "moveLeft":
-          moveLeft();
-          break;
-        case "moveRight":
-          moveRight();
-          break;
-        case "rotateRight":
-          rotate();
-          break;
-        case "softDrop":
-          startSoftDrop();
-          break;
-        case "hardDrop":
-          // Implement hard drop if needed
-          break;
+    const subscription = gameActionSubject.subscribe(
+      (control: ControlAction) => {
+        switch (control) {
+          case "moveLeft":
+            dispatch({ type: "MOVE_LEFT" });
+            break;
+          case "moveRight":
+            dispatch({ type: "MOVE_RIGHT" });
+            break;
+          case "rotateRight":
+            dispatch({ type: "ROTATE" });
+            break;
+          case "softDrop":
+            setIsSoftDrop(true);
+            break;
+          case "endSoftDrop":
+            setIsSoftDrop(false);
+            break;
+          case "hardDrop":
+            dispatch({ type: "HARD_DROP" });
+            break;
+        }
       }
-    });
+    );
 
     return () => subscription.unsubscribe();
-  }, [moveLeft, moveRight, rotate, startSoftDrop]);
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -347,7 +364,10 @@ export default function TetrisGame() {
 
       {!showFacialControls && (
         <View style={styles.controls}>
-          <TouchableOpacity onPress={moveLeft} style={styles.controlButton}>
+          <TouchableOpacity
+            onPress={() => dispatch({ type: "MOVE_LEFT" })}
+            style={styles.controlButton}
+          >
             <Ionicons
               name="arrow-back"
               size={30}
@@ -355,7 +375,10 @@ export default function TetrisGame() {
             />
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={rotate} style={styles.controlButton}>
+          <TouchableOpacity
+            onPress={() => dispatch({ type: "ROTATE" })}
+            style={styles.controlButton}
+          >
             <Ionicons
               name="refresh"
               size={30}
@@ -363,7 +386,10 @@ export default function TetrisGame() {
             />
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={moveRight} style={styles.controlButton}>
+          <TouchableOpacity
+            onPress={() => dispatch({ type: "MOVE_RIGHT" })}
+            style={styles.controlButton}
+          >
             <Ionicons
               name="arrow-forward"
               size={30}
@@ -372,8 +398,8 @@ export default function TetrisGame() {
           </TouchableOpacity>
 
           <TouchableOpacity
-            onPressIn={startSoftDrop}
-            onPressOut={endSoftDrop}
+            onPressIn={() => setIsSoftDrop(true)}
+            onPressOut={() => setIsSoftDrop(false)}
             style={styles.controlButton}
           >
             <Ionicons

@@ -1,19 +1,11 @@
 import { Subject } from "rxjs";
+import { ControlAction } from "../types/tetris";
 
-export type GameAction =
-  | "moveLeft"
-  | "moveRight"
-  | "rotateRight"
-  | "softDrop"
-  | "hardDrop";
+export const gameActionSubject = new Subject<ControlAction>();
 
-// Create a subject to emit game actions
-export const gameActionSubject = new Subject<GameAction>();
-
-// Map face directions to game actions
 export function mapFaceDirectionToGameAction(
   direction: string
-): GameAction | null {
+): ControlAction | null {
   switch (direction) {
     case "looking_left":
       return "moveLeft";
@@ -23,6 +15,8 @@ export function mapFaceDirectionToGameAction(
       return "rotateRight";
     case "looking_down":
       return "softDrop";
+    case "looking_center":
+      return "endSoftDrop";
     default:
       return null;
   }

@@ -25,7 +25,7 @@ export interface GameState {
   } | null;
 }
 
-export type GameAction =
+export type GameActionType =
   | { type: "MOVE_LEFT" }
   | { type: "MOVE_RIGHT" }
   | { type: "ROTATE" }
@@ -39,6 +39,15 @@ export type GameAction =
       board: (TetrisBlock | null)[][];
       scoreIncrease: number;
     };
+
+// This is what we'll use for external controls (facial/touch)
+export type ControlAction =
+  | "moveLeft"
+  | "moveRight"
+  | "rotateRight"
+  | "softDrop"
+  | "endSoftDrop"
+  | "hardDrop";
 
 export interface GameProps {
   useFacialControls?: boolean;
