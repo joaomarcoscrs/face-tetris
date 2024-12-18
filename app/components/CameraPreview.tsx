@@ -12,8 +12,7 @@ import {
 
 const ROBOFLOW_API_KEY = process.env.ROBOFLOW_API_KEY;
 const URL =
-  //   "https://joaomarcos-inference.ngrok.app/facial-features-3xkvb/2"; // model URL
-  "https://joaomarcos-inference.ngrok.app/infer/workflows/joao-marcos-3cjqf/tetris-controller";
+  "http://localhost:9001/infer/workflows/joao-marcos-3cjqf/tetris-controller";
 const CAPTURE_INTERVAL = 100;
 
 interface BlockResponse {
