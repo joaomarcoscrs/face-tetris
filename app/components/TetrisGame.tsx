@@ -1,5 +1,5 @@
 import React, { useReducer, useEffect, useCallback, useState } from "react";
-import { View, StyleSheet, TouchableOpacity, Text } from "react-native";
+import { View, StyleSheet, TouchableOpacity } from "react-native";
 import { GameState, GameAction } from "../types/tetris";
 import {
   createEmptyBoard,
@@ -38,7 +38,7 @@ const initialState: GameState = {
   pendingClear: null,
 };
 
-function gameReducer(state: GameState, action: GameAction): GameState {
+function gameReducer(state: GameState, action: GameActionType): GameState {
   switch (action.type) {
     case "MOVE_LEFT":
       if (
@@ -185,23 +185,6 @@ function gameReducer(state: GameState, action: GameAction): GameState {
 
     default:
       return state;
-  }
-}
-
-function mapControlToGameAction(control: ControlAction): GameActionType {
-  switch (control) {
-    case "moveLeft":
-      return { type: "MOVE_LEFT" };
-    case "moveRight":
-      return { type: "MOVE_RIGHT" };
-    case "rotateRight":
-      return { type: "ROTATE" };
-    case "softDrop":
-      return { type: "MOVE_DOWN" };
-    case "hardDrop":
-      return { type: "HARD_DROP" };
-    default:
-      throw new Error(`Unknown control action: ${control}`);
   }
 }
 

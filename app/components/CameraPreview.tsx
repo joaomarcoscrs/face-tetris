@@ -72,6 +72,9 @@ export default function CameraPreview() {
             // Map and emit game action if valid
             const gameAction = mapFaceDirectionToGameAction(action);
             if (gameAction) {
+              if (gameAction !== "softDrop") {
+                gameActionSubject.next("endSoftDrop");
+              }
               gameActionSubject.next(gameAction);
             }
 

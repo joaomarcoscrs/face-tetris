@@ -1,6 +1,5 @@
 import { BOARD_WIDTH, BOARD_HEIGHT, PIECES } from "../constants/tetris";
-import { TetrisPiece, TetrisBlock, GameState } from "../types/tetris";
-import { LogBox } from "react-native";
+import { TetrisPiece, TetrisBlock } from "../types/tetris";
 
 let lastPieceColorIndex = 0;
 
