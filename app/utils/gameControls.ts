@@ -8,9 +8,9 @@ export function mapFaceDirectionToGameAction(
 ): ControlAction | null {
   switch (direction) {
     case "looking_left":
-      return "moveLeft";
-    case "looking_right":
       return "moveRight";
+    case "looking_right":
+      return "moveLeft";
     case "looking_up":
       return "rotateRight";
     case "looking_down":

@@ -13,7 +13,7 @@ def run(self, yaw_degrees, pitch_degrees, left_threshold, right_threshold, up_th
     # pitch means up and down
     # yaw and pitch come as arrays, but we only need the first value
     yaw = safe_get_first_list_value(yaw_degrees, 0)
-    pitch = safe_get_first_list_value(pitch_degrees, 0) + 7 # need to correct because people often look down to their phones
+    pitch = safe_get_first_list_value(pitch_degrees, 0) + 10 # need to correct because people often look down to their phones
     
     right_score = 0
     left_score = 0
