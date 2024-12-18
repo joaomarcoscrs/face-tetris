@@ -10,11 +10,23 @@ import {
   mapFaceDirectionToGameAction,
 } from "../utils/gameControls";
 
-const ROBOFLOW_API_KEY = "9HsrYKPLHIIQFBAf38rI";
+const ROBOFLOW_API_KEY = process.env.ROBOFLOW_API_KEY;
 const URL =
   //   "https://joaomarcos-inference.ngrok.app/facial-features-3xkvb/2"; // model URL
   "https://joaomarcos-inference.ngrok.app/infer/workflows/joao-marcos-3cjqf/tetris-controller";
 const CAPTURE_INTERVAL = 100;
+
+interface BlockResponse {
+  data?: {
+    outputs?: [
+      {
+        action: string;
+        yaw: number[];
+        pitch: number[];
+      }
+    ];
+  };
+}
 
 export default function CameraPreview() {
   const facing: CameraType = "front";
@@ -23,6 +35,14 @@ export default function CameraPreview() {
   const [isCameraReady, setIsCameraReady] = useState(false);
   const isCapturing = useRef(false);
   const [latency, setLatency] = useState<number | null>(null);
+
+  const calculateIntensity = (yaw: number[], threshold: number): number => {
+    if (!yaw?.length) return 1;
+    const angle = Math.abs(yaw[0]);
+    if (angle <= threshold) return 1;
+    // Calculate how much we exceed the threshold, normalized
+    return Math.floor(Math.min((angle - threshold) / threshold + 1, 3));
+  };
 
   useEffect(() => {
     if (!permission?.granted || !isCameraReady) return;
@@ -67,16 +87,36 @@ export default function CameraPreview() {
 
             setLatency(requestTime);
 
-            const action = response.data?.outputs?.[0]?.action;
+            const handleResponse = (response: BlockResponse) => {
+              const action = response.data?.outputs?.[0]?.action;
+              const yaw = response.data?.outputs?.[0]?.yaw;
 
-            // Map and emit game action if valid
-            const gameAction = mapFaceDirectionToGameAction(action);
-            if (gameAction) {
-              if (gameAction !== "softDrop") {
-                gameActionSubject.next("endSoftDrop");
+              if (action) {
+                // Calculate intensity only for left/right movements
+                const intensity =
+                  action === "looking_left" || action === "looking_right"
+                    ? calculateIntensity(yaw || [], 7) // 20 degrees threshold, adjust as needed
+                    : 1;
+
+                // Map and emit game action if valid
+                const gameAction = mapFaceDirectionToGameAction({
+                  action,
+                  intensity,
+                });
+
+                if (gameAction) {
+                  if (gameAction.action !== "softDrop") {
+                    gameActionSubject.next({
+                      action: "endSoftDrop",
+                      intensity: 1,
+                    });
+                  }
+                  gameActionSubject.next(gameAction);
+                }
               }
-              gameActionSubject.next(gameAction);
-            }
+            };
+
+            handleResponse(response);
 
             console.log(`response.data: ${JSON.stringify(response.data)}`);
 

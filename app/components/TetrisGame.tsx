@@ -27,7 +27,7 @@ import { useLocalSearchParams } from "expo-router";
 import CameraPreview from "./CameraPreview";
 import { router } from "expo-router";
 import BackButton from "./BackButton";
-import { gameActionSubject } from "../utils/gameControls";
+import { DirectionAction, gameActionSubject } from "../utils/gameControls";
 import { GameActionType, ControlAction } from "../types/tetris";
 
 const initialState: GameState = {
@@ -41,32 +41,48 @@ const initialState: GameState = {
 function gameReducer(state: GameState, action: GameActionType): GameState {
   switch (action.type) {
     case "MOVE_LEFT":
-      if (
-        state.currentPiece &&
-        isValidMove(state.currentPiece, state.board, -1)
-      ) {
-        return {
-          ...state,
-          currentPiece: {
-            ...state.currentPiece,
-            x: state.currentPiece.x - 1,
-          },
-        };
+      if (state.currentPiece) {
+        const moveAmount = action.intensity || 1;
+        let newX = state.currentPiece.x;
+        // Try to move by the full amount, but stop if we hit something
+        while (
+          newX > state.currentPiece.x - moveAmount &&
+          isValidMove({ ...state.currentPiece, x: newX - 1 }, state.board)
+        ) {
+          newX--;
+        }
+        if (newX !== state.currentPiece.x) {
+          return {
+            ...state,
+            currentPiece: {
+              ...state.currentPiece,
+              x: newX,
+            },
+          };
+        }
       }
       return state;
 
     case "MOVE_RIGHT":
-      if (
-        state.currentPiece &&
-        isValidMove(state.currentPiece, state.board, 1)
-      ) {
-        return {
-          ...state,
-          currentPiece: {
-            ...state.currentPiece,
-            x: state.currentPiece.x + 1,
-          },
-        };
+      if (state.currentPiece) {
+        const moveAmount = action.intensity || 1;
+        let newX = state.currentPiece.x;
+        // Try to move by the full amount, but stop if we hit something
+        while (
+          newX < state.currentPiece.x + moveAmount &&
+          isValidMove({ ...state.currentPiece, x: newX + 1 }, state.board)
+        ) {
+          newX++;
+        }
+        if (newX !== state.currentPiece.x) {
+          return {
+            ...state,
+            currentPiece: {
+              ...state.currentPiece,
+              x: newX,
+            },
+          };
+        }
       }
       return state;
 
@@ -310,13 +326,13 @@ export default function TetrisGame() {
 
   useEffect(() => {
     const subscription = gameActionSubject.subscribe(
-      (control: ControlAction) => {
-        switch (control) {
+      (control: DirectionAction) => {
+        switch (control.action) {
           case "moveLeft":
-            dispatch({ type: "MOVE_LEFT" });
+            dispatch({ type: "MOVE_LEFT", intensity: control.intensity });
             break;
           case "moveRight":
-            dispatch({ type: "MOVE_RIGHT" });
+            dispatch({ type: "MOVE_RIGHT", intensity: control.intensity });
             break;
           case "rotateRight":
             dispatch({ type: "ROTATE" });

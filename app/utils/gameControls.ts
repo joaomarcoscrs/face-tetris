@@ -1,22 +1,36 @@
 import { Subject } from "rxjs";
 import { ControlAction } from "../types/tetris";
 
-export const gameActionSubject = new Subject<ControlAction>();
+export interface DirectionAction {
+  action: ControlAction;
+  intensity: number;
+}
 
-export function mapFaceDirectionToGameAction(
-  direction: string
-): ControlAction | null {
-  switch (direction) {
+export const gameActionSubject = new Subject<DirectionAction>();
+
+export function mapFaceDirectionToGameAction(response: {
+  action: string;
+  intensity?: number;
+}): DirectionAction | null {
+  const intensity = response.intensity || 1;
+
+  switch (response.action) {
     case "looking_right":
-      return "moveRight";
+      return {
+        action: "moveRight",
+        intensity: Math.min(Math.ceil(intensity * 3), 3),
+      };
     case "looking_left":
-      return "moveLeft";
+      return {
+        action: "moveLeft",
+        intensity: Math.min(Math.ceil(intensity * 3), 3),
+      };
     case "looking_up":
-      return "rotateRight";
+      return { action: "rotateRight", intensity: 1 };
     case "looking_down":
-      return "softDrop";
+      return { action: "softDrop", intensity: 1 };
     case "looking_center":
-      return "endSoftDrop";
+      return { action: "endSoftDrop", intensity: 1 };
     default:
       return null;
   }

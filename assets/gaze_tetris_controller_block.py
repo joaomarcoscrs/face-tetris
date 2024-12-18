@@ -38,13 +38,13 @@ def run(self, yaw_degrees, pitch_degrees, left_threshold, right_threshold, up_th
     if right_score == left_score == up_score == down_score:
         return { "action": "center"}
         
-    # returns the action with the highest score
+    # returns the action with the highest score and its intensity
     if right_score > left_score and right_score > up_score and right_score > down_score:
-        return { "action":"looking_right"}
+        return { "action":"looking_right", "intensity": right_score }
     elif left_score > right_score and left_score > up_score and left_score > down_score:
-        return { "action":"looking_left"}
+        return { "action":"looking_left", "intensity": left_score }
     elif up_score > right_score and up_score > left_score and up_score > down_score:
-        return { "action":"looking_up"}
+        return { "action":"looking_up", "intensity": up_score }
     elif down_score > right_score and down_score > left_score and down_score > up_score:
-        return { "action":"looking_down"}
-    return { "action": "center"}
+        return { "action":"looking_down", "intensity": down_score }
+    return { "action": "center", "intensity": 1 }

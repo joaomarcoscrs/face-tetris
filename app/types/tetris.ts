@@ -25,20 +25,25 @@ export interface GameState {
   } | null;
 }
 
-export type GameActionType =
-  | { type: "MOVE_LEFT" }
-  | { type: "MOVE_RIGHT" }
-  | { type: "ROTATE" }
-  | { type: "MOVE_DOWN" }
-  | { type: "HARD_DROP" }
-  | { type: "NEW_PIECE"; piece: TetrisPiece }
-  | { type: "GAME_OVER" }
-  | { type: "CLEAR_ROWS"; rows: number[] }
-  | {
-      type: "UPDATE_BOARD";
-      board: (TetrisBlock | null)[][];
-      scoreIncrease: number;
-    };
+type GameActionTypes =
+  | "MOVE_LEFT"
+  | "MOVE_RIGHT"
+  | "ROTATE"
+  | "MOVE_DOWN"
+  | "HARD_DROP"
+  | "NEW_PIECE"
+  | "GAME_OVER"
+  | "CLEAR_ROWS"
+  | "UPDATE_BOARD";
+
+export interface GameActionType {
+  type: GameActionTypes;
+  intensity?: number;
+  piece?: TetrisPiece;
+  rows?: number[];
+  board?: (TetrisBlock | null)[][];
+  scoreIncrease?: number;
+}
 
 // This is what we'll use for external controls (facial/touch)
 export type ControlAction =
